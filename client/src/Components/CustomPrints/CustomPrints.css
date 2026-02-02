@@ -1,0 +1,510 @@
+/* CustomPrints.css - Print Template Manager Styles */
+
+.custom-prints-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tabs */
+.print-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  bottom: -2px;
+}
+
+.tab-btn:hover {
+  color: #333;
+}
+
+.tab-btn.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+.tab-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ============= MANAGE TEMPLATES ============= */
+
+.manage-templates h2,
+.create-template h2 {
+  margin-bottom: 24px;
+  color: #1f2937;
+  font-size: 24px;
+}
+
+.module-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.module-btn {
+  padding: 10px 20px;
+  background: #f0f0f0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  color: #666;
+}
+
+.module-btn:hover {
+  background: #e8e8e8;
+}
+
+.module-btn.active {
+  background: #2563eb;
+  color: white;
+  border-color: #1e40af;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.no-templates {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 24px;
+  color: #999;
+}
+
+.no-templates p:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.template-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.template-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.template-card-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.template-module-badge {
+  background: #2563eb;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.template-card-body {
+  flex: 1;
+  margin-bottom: 16px;
+  color: #555;
+  font-size: 14px;
+}
+
+.template-card-body p {
+  margin: 8px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.template-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-edit,
+.btn-delete {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-size: 13px;
+}
+
+.btn-edit {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* ============= CREATE TEMPLATE ============= */
+
+.template-editor {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1200px) {
+  .template-editor {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.editor-left,
+.editor-middle,
+.editor-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.form-section h3 {
+  margin: 0 0 12px 0;
+  color: #2563eb;
+  font-size: 16px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-control,
+.textarea-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus,
+.textarea-control:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.textarea-control {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* Fields Selector */
+.fields-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.field-btn {
+  padding: 8px 12px;
+  background: #e8f0ff;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  color: #2563eb;
+  transition: all 0.3s ease;
+}
+
+.field-btn:hover {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Preview Container */
+.preview-container {
+  background: white;
+  border: 2px dashed #2563eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-header {
+  background: #2563eb;
+  color: white;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.preview-content {
+  padding: 16px;
+  min-height: 400px;
+  background: white;
+  position: relative;
+}
+
+.preview-logo {
+  background: #f0f0f0;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  border-radius: 6px;
+  color: #999;
+}
+
+.preview-section {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.preview-section h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.preview-section p {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+}
+
+.preview-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.preview-field {
+  background: #f0f8ff;
+  padding: 8px;
+  border-left: 3px solid #2563eb;
+  font-size: 12px;
+  color: #333;
+  border-radius: 3px;
+}
+
+.preview-meta {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* Selected Fields */
+.selected-fields {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.selected-fields h3 {
+  margin: 0 0 12px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.selected-field {
+  background: white;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  border: 1px solid #e0e0e0;
+}
+
+.remove-field-btn {
+  background: #fee2e2;
+  color: #dc2626;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.remove-field-btn:hover {
+  background: #dc2626;
+  color: white;
+}
+
+/* Action Buttons */
+.template-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-save,
+.btn-cancel {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  color: white;
+}
+
+.btn-save:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+}
+
+.btn-cancel {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .custom-prints-container {
+    padding: 16px;
+  }
+
+  .module-selector {
+    gap: 8px;
+  }
+
+  .module-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .template-editor {
+    grid-template-columns: 1fr;
+  }
+
+  .template-actions {
+    flex-direction: column;
+  }
+
+  .btn-save,
+  .btn-cancel {
+    width: 100%;
+  }
+}

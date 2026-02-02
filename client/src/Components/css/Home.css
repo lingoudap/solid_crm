@@ -1,0 +1,172 @@
+/* Note: Top Bar styles are now in top-bar.css for enhanced styling */
+/* This file is kept for backward compatibility */
+
+.dark-mode-button {
+  margin-left: 20px;
+  padding: 5px 10px;
+}
+
+
+/* Rest styles */
+.sidebar .logo {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.sidebar-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-list-item {
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-list-item.active {
+  background-color: #555;
+}
+
+.sidebar-list-item:hover {
+  background: #444;
+}
+
+/* Submenu */
+.submenu {
+  padding-left: 16px;
+}
+
+.sidebar-subitem {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.sidebar-subitem.active {
+  background: rgba(255, 255, 255, 0.08);
+}
+/* Main Content Area */
+.main-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100vh - 90px);
+  box-sizing: border-box;
+  overflow-y: auto;
+  margin-left: 250px;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 75px;
+}
+
+/* Adjust margin when sidebar is collapsed */
+.sidebar.collapsed ~ .main-content {
+  margin-left: 70px;
+}
+
+/* Page Content Container */
+.page-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Dashboard Specific Styles */
+.dashboard-content {
+  width: 100%;
+  padding: 0;
+}
+
+/* Section Headers */
+.section-title {
+  color: #333;
+  margin: 20px 0 30px 0;
+  text-align: left;
+  font-size: 1.8rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.dark .section-title {
+  color: #fff;
+}
+
+
+
+/* Main CSS File - Imports all other files */
+@import url('base.css');
+@import url('top-bar.css');
+@import url('sidebar.css');
+@import url('main-content.css');
+@import url('components.css');
+@import url('forms-tables.css');
+@import url('responsive.css');
+
+/* Additional global styles that don't fit elsewhere */
+.content-card {
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.dark .content-card { background: #2d2d2d; }
+
+.simple-list { list-style: none; padding-left: 0; }
+
+/* Marquee */
+.marquee-wrapper {
+  width: 100%;
+  background-color: transparent;
+  text-align: center;
+  padding: 5px 0;
+  margin-top: 10px;
+}
+
+.marquee {
+  color: black;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Dashboard charts 2x2 grid */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+}
+
+.chart-card h3 { margin: 6px 0 8px; }
+
+.combinedGraphContainer { flex: 1 1 auto; }
+
+.btn-apply, .btn1, .btn2, .btn3, .btn4 { cursor: pointer; }
+
+/* Dark mode tweaks */
+.dark .chart-card { background: #2b2b2b; color: #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+
+@media (max-width: 900px) {
+  .dashboard-charts-grid { grid-template-columns: 1fr; }
+}

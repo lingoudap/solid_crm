@@ -1,0 +1,514 @@
+/* ========================================
+   ENHANCED SIDEBAR WITH MODERN STYLING
+   ======================================== */
+
+/* Sidebar Container */
+.sidebar {
+  width: 250px;
+  height: calc(100vh - 70px);
+  background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
+  padding: 20px 15px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 70px;
+  left: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 100;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar.light {
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #333;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.dark {
+  background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: white;
+}
+
+/* Collapsed State */
+.sidebar.collapsed {
+  width: 70px;
+  padding: 15px 8px;
+}
+
+/* Expanded State */
+.sidebar.expanded {
+  width: 250px;
+}
+
+/* ========================================
+   SIDEBAR LOGO
+   ======================================== */
+
+.sidebar .logo {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .logo {
+  font-size: 32px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar .logo:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+/* ========================================
+   SIDEBAR LOGO CONTAINER (For Image Logo)
+   ======================================== */
+
+.sidebar .top-bar-logo-container {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  min-height: 60px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .top-bar-logo-container:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+}
+
+/* Logo Image in Sidebar */
+.sidebar .top-bar-logo {
+  max-width: 100%;
+  max-height: 55px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.sidebar .top-bar-logo:hover {
+  transform: scale(1.1);
+}
+
+/* Sidebar Collapsed State - Logo Container */
+.sidebar.collapsed .top-bar-logo-container {
+  padding: 10px;
+  min-height: 60px;
+  margin-bottom: 20px;
+}
+
+/* Sidebar Collapsed State - Logo Image */
+.sidebar.collapsed .top-bar-logo {
+  max-height: 60px;
+}
+
+/* Light Theme - Logo Container */
+.sidebar.light .top-bar-logo-container {
+  background: rgba(0, 0, 0, 0.05);
+  border: 0px solid rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.light .top-bar-logo-container:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme - Logo Container */
+.sidebar.dark .top-bar-logo-container {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar.dark .top-bar-logo-container:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Fallback Icon in Sidebar Logo Container */
+.sidebar .top-bar-logo-container span {
+  font-size: 32px;
+  display: block;
+  width: 100%;
+}
+
+.sidebar.collapsed .top-bar-logo-container span {
+  font-size: 28px;
+}
+
+/* ========================================
+   SIDEBAR LIST & ITEMS
+   ======================================== */
+
+.sidebar-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Main List Items */
+.sidebar-list-item {
+  padding: 14px 16px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar .sidebar-list-item {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sidebar.light .sidebar-list-item {
+  color: #555;
+}
+
+/* Hover State */
+.sidebar-list-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  padding-left: 18px;
+}
+
+.sidebar.light .sidebar-list-item:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #222;
+}
+
+/* Active State */
+.sidebar-list-item.active {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.sidebar.light .sidebar-list-item.active {
+  background: linear-gradient(135deg, #0d6efd 0%, #0054a8 100%);
+  color: white;
+}
+
+/* Active Indicator */
+.sidebar-list-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  background: #fff;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ========================================
+   MODULE GROUP & SUBMENU
+   ======================================== */
+
+.module-group {
+  margin-bottom: 0;
+}
+
+.module-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.module-item span:last-child {
+  transition: transform 0.3s ease;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.module-item.active span:last-child {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+
+/* Submenu Container */
+.submenu {
+  list-style: none;
+  padding: 8px 0 8px 8px;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid rgba(0, 123, 255, 0.3);
+  border-radius: 6px;
+  margin-top: 4px;
+  animation: slideDown 0.3s ease forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 500px;
+  }
+}
+
+.sidebar.light .submenu {
+  background: rgba(0, 0, 0, 0.03);
+  border-left-color: rgba(0, 123, 255, 0.2);
+}
+
+/* Submenu Items */
+.sidebar-subitem {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-weight: 400;
+}
+
+.sidebar.light .sidebar-subitem {
+  color: #666;
+}
+
+.sidebar-subitem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding-left: 16px;
+}
+
+.sidebar.light .sidebar-subitem:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #222;
+}
+
+.sidebar-subitem.active {
+  background: rgba(0, 123, 255, 0.2);
+  color: #00d4ff;
+  font-weight: 600;
+  padding-left: 16px;
+}
+
+.sidebar.light .sidebar-subitem.active {
+  background: rgba(0, 123, 255, 0.15);
+  color: #0056b3;
+}
+
+/* ========================================
+   SIDEBAR FOOTER
+   ======================================== */
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar.light .sidebar-footer {
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-footer-item {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar.light .sidebar-footer-item {
+  color: #666;
+}
+
+.sidebar-footer-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar.light .sidebar-footer-item:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #222;
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 123, 255, 0.5);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 123, 255, 0.8);
+}
+
+.sidebar.light::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar.light::-webkit-scrollbar-thumb {
+  background: rgba(0, 123, 255, 0.4);
+}
+
+.sidebar.light::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 123, 255, 0.6);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 220px;
+  }
+
+  .sidebar-list-item {
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+
+  .sidebar-subitem {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+    padding: 12px 8px;
+  }
+
+  .sidebar.expanded {
+    width: 220px;
+  }
+
+  .sidebar .logo {
+    font-size: 24px;
+    margin-bottom: 15px;
+    padding: 10px;
+  }
+
+  .sidebar-list-item {
+    padding: 12px 14px;
+    justify-content: center;
+  }
+
+  .sidebar.expanded .sidebar-list-item {
+    justify-content: space-between;
+  }
+
+  .sidebar-subitem {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .sidebar.collapsed span {
+    display: none;
+  }
+
+  .sidebar.collapsed .submenu {
+    display: none;
+  }
+
+  .sidebar.collapsed .sidebar-list-item {
+    margin-left: 0;
+  }
+
+  .submenu {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    background: #2d2d2d;
+    border-radius: 8px;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: none;
+    border-left: none;
+  }
+
+  .sidebar.light .submenu {
+    background: #f8f9fa;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 50px;
+    padding: 10px 5px;
+  }
+
+  .sidebar.expanded {
+    width: 100%;
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    height: auto;
+    max-height: calc(100vh - 70px);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .sidebar .logo {
+    font-size: 22px;
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  .sidebar-list {
+    gap: 4px;
+  }
+
+  .sidebar-list-item {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+
+  .sidebar-subitem {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+}
