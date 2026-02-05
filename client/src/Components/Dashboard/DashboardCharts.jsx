@@ -115,13 +115,41 @@ const ChartPanel = ({ title, table, dateColumn }) => {
 };
 
 const DashboardCharts = () => {
+  const [showCharts, setShowCharts] = useState(false);
+
   return (
-    <div className="dashboard-charts-grid">
-      <ChartPanel title="Leads" table="db_enq" dateColumn="enqdate" />
-      <ChartPanel title="Quotations" table="db_quote" dateColumn="quotedate" />
-      <ChartPanel title="Order" table="db_oa" dateColumn="oadate" />
-      <ChartPanel title="Invoice" table="db_invoice" dateColumn="oadate" />
-    </div>
+    <>
+      <button 
+        className="visual-dashboard-btn"
+        onClick={() => setShowCharts(!showCharts)}
+        style={{
+          display: "block",
+          margin: "20px auto",
+          padding: "12px 30px",
+          fontSize: "16px",
+          fontWeight: "600",
+          backgroundColor: "#4CAF50",
+          color: "white",
+          border: "none",
+          borderRadius: "6px",
+          cursor: "pointer",
+          transition: "all 0.3s ease"
+        }}
+        onMouseEnter={(e) => e.target.style.backgroundColor = "#45a049"}
+        onMouseLeave={(e) => e.target.style.backgroundColor = "#4CAF50"}
+      >
+        {showCharts ? "Hide Charts" : "Visual Dashboard"}
+      </button>
+
+      {showCharts && (
+        <div className="dashboard-charts-grid">
+          <ChartPanel title="Leads" table="db_enq" dateColumn="enqdate" />
+          <ChartPanel title="Quotations" table="db_quote" dateColumn="quotedate" />
+          <ChartPanel title="Order" table="db_oa" dateColumn="oadate" />
+          <ChartPanel title="Invoice" table="db_invoice" dateColumn="oadate" />
+        </div>
+      )}
+    </>
   );
 };
 
