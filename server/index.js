@@ -18,6 +18,7 @@ import followUpRoutes from "./routes/followUps.js";
 import quotationRoutes from "./routes/quotationRoutes.js";
 import leadsRoutes from "./routes/leadsRoutes.js";
 import bulkUploadRoutes from "./routes/bulkUploadRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 // Config
 import connectDB from "./config/db.js";
@@ -135,6 +136,7 @@ app.use("/api/followups", followUpRoutes);
 app.use("/api/quotations", quotationRoutes);
 app.use("/api/leads", leadsRoutes);
 app.use("/api", bulkUploadRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Customers CRUD
 app.post("/api/customers", async (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import "./Components/css/main.css";
 import "./Components/css/Home.css";
 import Lead from "./Components/Leads/AddLead";
@@ -16,21 +16,11 @@ import FollowUpPage from "./Components/FollowUps/AddFollowUp";
 import Settings from "./Components/Settings/Settings";
 import BulkUpload from "./Components/BulkUpload/BulkUpload";
 import CustomPrints from "./Components/CustomPrints/CustomPrints";
+import AddReport from "./Components/Reports/AddReport";
+import ViewReports from "./Components/Reports/ViewReports";
 import { useSettings } from "./context/SettingsContext";
 
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+
 import DashboardCharts from "./Components/Dashboard/DashboardCharts";
 
 const HomePage = ({ setCurrentPage, loggedInUser }) => {
@@ -48,17 +38,18 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
   const [appLogo, setAppLogo] = useState(null);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     { id: 1, icon: "📝", text: "New quotation created", time: "5 mins ago" },
     { id: 2, icon: "🎉", text: "Order confirmed", time: "1 hour ago" },
     { id: 3, icon: "📞", text: "Follow-up reminder", time: "2 hours ago" },
+
   ]);
 
-  // Include Settings and Custom Prints in the sidebar
-  const modules = ["Lead", "Quotation", "Order", "Customer", "Follow-Up", "ToDo", "Bulk Upload", "Custom Prints", "Settings"];
+  // Include Settings, Reports, Custom Prints in the sidebar
+  const modules = ["Lead", "Quotation", "Order", "Customer", "Follow-Up", "ToDo", "Reports", "Bulk Upload", "Custom Prints", "Settings"];
 
   const defaultBase = process.env.NODE_ENV === "development" ? "http://localhost:5000" : "";
-  const baseUrl = process.env.REACT_APP_API_URL || defaultBase;
+  const apiUrl = process.env.REACT_APP_API_URL || defaultBase;
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -94,7 +85,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
           const parsedUser = JSON.parse(user);
           if (parsedUser.id) {
             console.log("📥 Fetching company settings from backend for user:", parsedUser.id);
-            fetch(`http://localhost:5000/api/company-settings/${parsedUser.id}`)
+            fetch(`${apiUrl}/api/company-settings/${parsedUser.id}`)
               .then(res => res.json())
               .then(data => {
                 if (data.companySettings && data.companySettings.logo) {
@@ -231,7 +222,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
     }
   };
 
-  const chartData = [
+  const dashboardChartData = [
     { name: "Customers", value: customerCount },
     { name: "Leads", value: leadsCount },
     { name: "Quotations", value: quotationsCount },
@@ -250,6 +241,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       "Bulk Upload": "📥",
       "Custom Prints": "🖨️",
       Settings: "⚙️",
+      Reports: "📊",
       Logout: "🚪",
     };
     return <span>{icons[item] || "🔹"}</span>;
@@ -296,7 +288,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
               </div>
               <div className="stat-icon">📦</div>
             </div>
-          </div>
+    </div>
 
 
 
@@ -364,6 +356,11 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
         return <CustomPrints />;
       case "Settings":
         return <Settings />;
+      case "Reports":
+        if (activeSub === "Add") return <AddReport />;
+        if (activeSub === "View") return <ViewReports />;
+        break;
+        
       default:
         return <div>Welcome — choose a module from the left.</div>;
     }
@@ -582,7 +579,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
             {/* Main Modules */}
             {modules.map((mod) => (
               <li key={mod} className="module-group">
-                {mod === "Settings" || mod === "Bulk Upload" ? (
+                {mod === "Settings" || mod === "Bulk Upload" || mod === "Custom Prints" ? (
                   <div
                     className={`sidebar-list-item ${activeModule === mod ? "active" : ""
                       }`}
@@ -666,9 +663,9 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
 
           {activeModule === "Dashboard" && (
             <div className="marquee-wrapper">
-              <marquee behavior="scroll" direction="left" className="marquee">
+              <div className="marquee">
                 📢 Welcome to Sales Dashboard! Stay updated with the latest info.
-              </marquee>
+              </div>
             </div>
           )}
 
