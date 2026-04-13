@@ -4,6 +4,8 @@ import { useSettings } from "../../context/SettingsContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GeneralSettings from "./GeneralSettings";
+import ModuleSettings from "./ModuleSettings";
+import CompanyProfile from "./CompanyProfile";
 import "./settings.css";
 
 const Settings = () => {
@@ -336,6 +338,16 @@ const Settings = () => {
   if (activeTab === "general")
     return <GeneralSettings setActiveTab={setActiveTab} />;
   if (activeTab === "customizable") return renderCustomizableSettings();
+  if (activeTab === "company")
+    return <CompanyProfile setActiveTab={setActiveTab} />;
+  if (activeTab === "lead")
+    return <ModuleSettings module="lead" setActiveTab={setActiveTab} />;
+  if (activeTab === "customer")
+    return <ModuleSettings module="customer" setActiveTab={setActiveTab} />;
+  if (activeTab === "quotation")
+    return <ModuleSettings module="quotation" setActiveTab={setActiveTab} />;
+  if (activeTab === "order")
+    return <ModuleSettings module="order" setActiveTab={setActiveTab} />;
 
   // Default Settings Dashboard
   return (
@@ -343,47 +355,47 @@ const Settings = () => {
       <ToastContainer />
       <h1>⚙️ Settings Dashboard</h1>
       <div className="dashboard-grid">
-        <div className="settings-card" onClick={() => setActiveTab("general")}>
+        <div className="settings-card clickable" onClick={() => setActiveTab("general")}>
+          <span className="settings-card-icon">⚙️</span>
           <h3>General Settings</h3>
-          <p>Manage theme, notifications, language, and more.</p>
+          <p>Manage theme, notifications, language, and logo.</p>
         </div>
 
-        <div
-          className="settings-card"
-          onClick={() => setActiveTab("customizable")}
-        >
+        <div className="settings-card clickable" onClick={() => setActiveTab("company")}>
+          <span className="settings-card-icon">🏢</span>
+          <h3>Company Profile</h3>
+          <p>Company name, address, contact, and tax details.</p>
+        </div>
+
+        <div className="settings-card clickable" onClick={() => setActiveTab("customizable")}>
+          <span className="settings-card-icon">🎨</span>
           <h3>Custom Form Fields</h3>
           <p>Create and manage custom fields for your forms.</p>
         </div>
 
-
-        <div className="settings-card">
+        <div className="settings-card clickable" onClick={() => setActiveTab("lead")}>
+          <span className="settings-card-icon">📋</span>
           <h3>Lead Settings</h3>
-          <p>You can Configure the Lead Module</p>
+          <p>Configure lead sources, statuses, and priorities.</p>
         </div>
-        <div
-          className="settings-card"
 
-        >
+        <div className="settings-card clickable" onClick={() => setActiveTab("customer")}>
+          <span className="settings-card-icon">👥</span>
           <h3>Customer Settings</h3>
-          <p>You can Configure the Customer Module</p>
+          <p>Configure customer types and statuses.</p>
         </div>
 
-        <div className="settings-card">
+        <div className="settings-card clickable" onClick={() => setActiveTab("quotation")}>
+          <span className="settings-card-icon">📝</span>
           <h3>Quotation Settings</h3>
-          <p>You can Configure the Quotation Module</p>
+          <p>Configure quotation statuses and types.</p>
         </div>
-        <div
-          className="settings-card"
 
-        >
+        <div className="settings-card clickable" onClick={() => setActiveTab("order")}>
+          <span className="settings-card-icon">📦</span>
           <h3>Order Settings</h3>
-          <p>You can Configure the Order Module</p>
+          <p>Configure order and payment statuses.</p>
         </div>
-
-
-
-
       </div>
     </div>
   );

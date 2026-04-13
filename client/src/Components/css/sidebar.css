@@ -38,6 +38,45 @@
   padding: 15px 8px;
 }
 
+/* Collapsed: center icons and hide submenus */
+.sidebar.collapsed .sidebar-list-item {
+  justify-content: center;
+  padding: 14px 0;
+}
+
+.sidebar.collapsed .sidebar-list-item:hover {
+  padding-left: 0;
+}
+
+.sidebar.collapsed .module-item > div {
+  flex: unset;
+  justify-content: center;
+}
+
+.sidebar.collapsed .submenu {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-list-item span:first-child {
+  font-size: 20px;
+}
+
+.sidebar.collapsed .sidebar-subitem span:first-child {
+  font-size: 16px;
+}
+
+.sidebar.collapsed .module-group {
+  overflow: visible;
+}
+
+.sidebar.collapsed .sidebar-footer-item {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-list-item.active::before {
+  height: 20px;
+}
+
 /* Expanded State */
 .sidebar.expanded {
   width: 250px;

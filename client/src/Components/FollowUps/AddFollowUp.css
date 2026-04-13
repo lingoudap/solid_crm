@@ -1,3 +1,4 @@
+/* AddFollowUp.css
 /* Modal Overlay and Box */
 .modal-bg {
   position: fixed;
@@ -252,7 +253,7 @@ Add Followup Page Container
   background-color: #fff;
   padding: 25px;
   border-radius: 10px;
-  width: 400px;
+  width: 800px;
   max-width: 90%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   position: relative;

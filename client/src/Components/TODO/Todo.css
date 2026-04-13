@@ -340,7 +340,11 @@
 
 /* Todo List */
 .todo-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
   min-height: 400px;
+  padding: 10px 0;
 }
 
 .empty-state {
@@ -348,129 +352,188 @@
   padding: 60px 20px;
   color: var(--text-secondary);
   font-size: 1.1rem;
+  grid-column: 1 / -1;
 }
 
-/* Todo Item */
+/* Todo Item - Card Layout */
 .todo-item {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  margin-bottom: 10px;
-  padding: 0;
+  border-radius: 12px;
+  padding: 20px;
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.dark .todo-item {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .todo-item:hover {
-  box-shadow: var(--shadow);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  border-color: var(--primary-color);
+}
+
+.dark .todo-item:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
 .todo-item.dragging {
   background: var(--primary-color);
   color: white;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  transform: rotate(3deg);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  transform: rotate(2deg) scale(1.02);
+  border-color: var(--primary-color);
 }
 
 .todo-item.completed {
-  opacity: 0.7;
-  background: rgba(76, 175, 80, 0.1);
+  opacity: 0.75;
+  background: rgba(76, 175, 80, 0.08);
+  border-color: var(--success-color);
+}
+
+.dark .todo-item.completed {
+  background: rgba(129, 199, 132, 0.15);
 }
 
 .todo-item.overdue {
-  border-left: 4px solid var(--error-color);
+  border-left: 5px solid var(--error-color);
+  background: rgba(244, 67, 54, 0.05);
+}
+
+.dark .todo-item.overdue {
+  background: rgba(229, 115, 115, 0.15);
 }
 
 .todo-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
 }
-
 .todo-main {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 12px;
   flex: 1;
 }
 
 .complete-checkbox {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
   margin-top: 2px;
   cursor: pointer;
+  accent-color: var(--primary-color);
 }
 
 .todo-text {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .todo-text span {
   display: block;
-  font-size: 1.1rem;
-  margin-bottom: 8px;
-  line-height: 1.4;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  font-weight: 500;
+}
+
+.todo-item.completed .todo-text span {
+  text-decoration: line-through;
+  opacity: 0.7;
 }
 
 .todo-meta {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .category-badge,
 .priority-badge,
 .overdue-badge,
 .due-date {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: white;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
+  white-space: nowrap;
 }
 
 .due-date {
   background: var(--text-secondary);
   color: var(--bg-color);
+  font-weight: 600;
 }
 
 .overdue-badge {
   background: var(--error-color);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .todo-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
 }
 
 .edit-button,
 .delete-button {
-  padding: 8px;
+  padding: 10px;
   border: none;
-  border-radius: 4px;
-  background: transparent;
+  border-radius: 6px;
+  background: var(--surface-color);
   color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1rem;
+  flex: 1;
 }
 
-.edit-button:hover {
+.dark .edit-button,
+.dark .delete-button {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.edit-button:hover:not(:disabled) {
   background: var(--primary-color);
   color: white;
+  transform: scale(1.05);
 }
 
 .delete-button:hover {
   background: var(--error-color);
   color: white;
+  transform: scale(1.05);
 }
 
 .edit-button:disabled {
@@ -479,8 +542,9 @@
 }
 
 .edit-button:disabled:hover {
-  background: transparent;
+  background: var(--surface-color);
   color: var(--text-secondary);
+  transform: scale(1);
 }
 
 /* Edit Overlay */
@@ -512,22 +576,62 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+
+/* Desktop (3-4 cards) - 4 cards */
+@media (min-width: 1400px) {
+  .todo-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Desktop (3 cards) - default */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .todo-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Tablet (2 cards) */
+@media (max-width: 1023px) {
+  .todo-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
   .todo-container {
-    padding: 10px;
+    padding: 15px;
   }
   
   .header h1 {
     font-size: 2rem;
   }
   
+  .header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+  }
+  
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+  
+  .stat-item {
+    padding: 15px;
+  }
+  
   .form-controls {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  .form-actions {
+    grid-column: 1 / -1;
   }
   
   .control-group {
     flex-direction: column;
-    align-items: stretch;
+    gap: 10px;
   }
   
   .search-input,
@@ -535,32 +639,158 @@
   .sort-select,
   .sort-order-button,
   .clear-button {
-    min-width: auto;
     width: 100%;
+  }
+  
+  .todo-item {
+    padding: 18px;
+  }
+  
+  .todo-text span {
+    font-size: 1rem;
+  }
+  
+  .todo-actions {
+    gap: 4px;
+  }
+}
+
+/* Mobile (1 card) */
+@media (max-width: 640px) {
+  .todo-list {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .todo-container {
+    padding: 12px;
+    min-height: 100vh;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    text-align: center;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .theme-toggle {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
   }
   
   .stats {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
   }
   
-  .todo-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;
+  .stat-item {
+    padding: 12px;
+    font-size: 0.9rem;
   }
   
-  .todo-actions {
-    align-self: flex-end;
+  .stat-item span:first-child {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
   }
-}
-
-@media (max-width: 480px) {
-  .stats {
+  
+  .stat-item span:last-child {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .todo-form {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .todo-input {
+    font-size: 1rem;
+  }
+  
+  .form-controls {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .form-actions {
+    grid-column: 1;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+  
+  .controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .control-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .search-input,
+  .filter-select,
+  .sort-select,
+  .sort-order-button,
+  .clear-button {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+  
+  .todo-item {
+    padding: 16px;
+    border-radius: 10px;
+  }
+  
+  .todo-text span {
+    font-size: 1rem;
+    margin-bottom: 8px;
   }
   
   .todo-meta {
+    gap: 6px;
+    margin-top: 8px;
+  }
+  
+  .category-badge,
+  .priority-badge,
+  .overdue-badge,
+  .due-date {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+  
+  .todo-actions {
+    gap: 4px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  
+  .edit-button,
+  .delete-button {
+    padding: 8px;
+    font-size: 0.9rem;
+    flex: 1;
+  }
+  
+  .undo-notification {
+    bottom: 15px;
+    left: 12px;
+    right: 12px;
+    padding: 12px;
     flex-direction: column;
-    align-items: flex-start;
+    gap: 8px;
   }
 }

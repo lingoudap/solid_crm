@@ -48,4 +48,47 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// POST /api/login
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    // 2. Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // 3. Compare password with hashed password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // 4. Return user data (exclude password)
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role || 'user'
+    };
+
+    // 5. Send response with user data
+    return res.json({
+      message: "Login successful",
+      user: userData,
+      token: null // Optional: Can add JWT token here in future
+    });
+
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;

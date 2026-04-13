@@ -39,6 +39,9 @@ export default function FollowUpPage({ onCustomerAdded }) {
     }
 
     const followUpDateTime = new Date(`${followUpDate}T${followUpTime}`);
+    
+    // Convert module name to relatedType (Leads -> Lead, Quotations -> Quotation)
+    const relatedType = selectedModule === "Leads" ? "Lead" : selectedModule === "Quotations" ? "Quotation" : selectedModule;
 
     try {
       const base2 = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -46,10 +49,11 @@ export default function FollowUpPage({ onCustomerAdded }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          entryId: selectedEntry._id,
-          module: selectedModule,
-          remark: followUpNote,
-          followUpAt: followUpDateTime.toISOString(),
+          relatedType: relatedType,
+          relatedId: selectedEntry._id,
+          followUpDate: followUpDateTime.toISOString(),
+          notes: followUpNote,
+          status: "Pending"
         }),
       });
 

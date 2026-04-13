@@ -12,6 +12,9 @@ import User from "./models/User.js";
 import Lead from "./models/Leads.js";
 import Customer from "./models/Customer.js";
 import Order from "./models/Order.js";
+import Quotation from "./models/Quotation.js";
+import Invoice from "./models/Invoice.js";
+import Notification from "./models/Notification.js";
 
 // Routes
 import followUpRoutes from "./routes/followUps.js";
@@ -19,16 +22,24 @@ import quotationRoutes from "./routes/quotationRoutes.js";
 import leadsRoutes from "./routes/leadsRoutes.js";
 import bulkUploadRoutes from "./routes/bulkUploadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import templateRoutes from "./routes/templateRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 // Config
 import connectDB from "./config/db.js";
-
+import followUpReminder from "./cron/followupCron.js";
 const app = express();
 dotenv.config();
 
 // Connect MongoDB
 connectDB()
-  .then(() => console.log("✅ MongoDB connected"))
+  .then(() => {
+    console.log("✅ MongoDB connected");
+    // Start cron AFTER DB is connected
+    followUpReminder();
+    console.log("⏰ Follow-up reminder cron job started");
+  })
   .catch((err) => console.error("❌ DB connect error", err));
 
 // =================== MIDDLEWARE ===================
@@ -131,13 +142,6 @@ app.post("/api/register", async (req, res) => {
 
 
 
-// =================== ROUTES ===================
-app.use("/api/followups", followUpRoutes);
-app.use("/api/quotations", quotationRoutes);
-app.use("/api/leads", leadsRoutes);
-app.use("/api", bulkUploadRoutes);
-app.use("/api/reports", reportRoutes);
-
 // Customers CRUD
 app.post("/api/customers", async (req, res) => {
   try {
@@ -227,6 +231,47 @@ app.get("/api/company-settings/:userId", async (req, res) => {
   }
 });
 
+// =================== COMPANY PROFILE ===================
+// Save company profile
+app.post("/api/company-profile/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const profileData = req.body;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { companyProfile: profileData },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ message: "Company profile saved", companyProfile: user.companyProfile });
+  } catch (error) {
+    console.error("Error saving company profile:", error);
+    res.status(500).json({ error: "Failed to save company profile" });
+  }
+});
+
+// Get company profile
+app.get("/api/company-profile/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ companyProfile: user.companyProfile || {} });
+  } catch (error) {
+    console.error("Error fetching company profile:", error);
+    res.status(500).json({ error: "Failed to fetch company profile" });
+  }
+});
+
 // =================== FRONTEND DEPLOYMENT ===================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -240,7 +285,115 @@ console.log(
   fs.existsSync(path.join(clientBuildPath, "index.html"))
 );
 
+// =================== ROUTES ===================
+console.log("📝 Registering API routes...");
+
+// Register specific routes FIRST (before generic ones)
+app.use("/api/followups", followUpRoutes);
+app.use("/api/quotations", quotationRoutes);
+app.use("/api/leads", leadsRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/templates", templateRoutes);
+app.use("/api/invoices", invoiceRoutes);
+app.use("/api/notifications", notificationRoutes);
+
+// Register generic /api routes LAST
+app.use("/api", bulkUploadRoutes);
+
+console.log("✅ API routes registered successfully");
+
+// =================== STATIC FILES (After API routes!) ===================
 app.use(express.static(clientBuildPath));
+app.get("/api/chart-data", async (req, res) => {
+  try {
+    const { table, dateColumn, fromDate, toDate, interval } = req.query;
+
+    if (!table || !dateColumn || !fromDate || !toDate) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    // Map table names to models
+    const tableMap = {
+      "db_enq": Lead,
+      "db_quote": Quotation,
+      "db_oa": Order,
+      "db_invoice": Invoice
+    };
+
+    const collection = tableMap[table];
+    if (!collection) {
+      return res.status(400).json({ error: "Invalid table name" });
+    }
+
+    // Parse dates
+    const startDate = new Date(fromDate);
+    const endDate = new Date(toDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    console.log(`[Chart Data] Table: ${table}, Column: ${dateColumn}, Range: ${startDate} to ${endDate}, Interval: ${interval}`);
+
+    // Build aggregation pipeline
+    let groupByFormat;
+    switch (interval) {
+      case "day":
+        groupByFormat = {
+          $dateToString: { format: "%Y-%m-%d", date: `$${dateColumn}` }
+        };
+        break;
+      case "month":
+        groupByFormat = {
+          $dateToString: { format: "%Y-%m", date: `$${dateColumn}` }
+        };
+        break;
+      case "year":
+        groupByFormat = {
+          $dateToString: { format: "%Y", date: `$${dateColumn}` }
+        };
+        break;
+      default:
+        groupByFormat = {
+          $dateToString: { format: "%Y-%m-%d", date: `$${dateColumn}` }
+        };
+    }
+
+    const pipeline = [
+      {
+        $match: {
+          [dateColumn]: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: groupByFormat,
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ];
+
+    // Execute aggregation - use exec() for older Mongoose or without for newer
+    const data = await collection.aggregate(pipeline);
+
+    console.log(`[Chart Data] Found ${data.length} records for ${table}`);
+
+    // Format the response
+    const labels = data.map(d => d._id || "Unknown");
+    const counts = data.map(d => d.count || 0);
+
+    res.json({
+      labels,
+      data: counts
+    });
+  } catch (err) {
+    console.error("Error fetching chart data:", err);
+    res.status(500).json({ error: "Failed to fetch chart data", details: err.message });
+  }
+});
 
 // 👉 API 404 Handler (for undefined API routes)
 app.use("/api", (req, res) => {
@@ -260,4 +413,5 @@ app.use((err, req, res, next) => {
 
 // =================== START SERVER ===================
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

@@ -36,7 +36,7 @@ const GeneralSettings = ({ setActiveTab }) => {
         return;
       }
       // Validate file size (max 2MB)
-      if (file.size > 2 * 1024 * 1024 * 1024) {
+      if (file.size > 2 * 1024 * 1024) {
         toast.error("Logo size should be less than 2MB");
         return;
       }
@@ -44,7 +44,6 @@ const GeneralSettings = ({ setActiveTab }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64 = reader.result;
-        console.log("📷 Logo file read, size:", base64.length);
         setLogo(base64);
         setLogoPreview(base64);
       };
@@ -53,12 +52,9 @@ const GeneralSettings = ({ setActiveTab }) => {
   };
 
   const handleSaveSettings = async () => {
-    console.log("🔄 Starting to save settings...");
-
-    // Get user from localStorage
     const userStr = localStorage.getItem("user");
     if (!userStr) {
-      toast.error("❌ User not found. Please login again.");
+      toast.error("User not found. Please login again.");
       return;
     }
 
@@ -66,12 +62,9 @@ const GeneralSettings = ({ setActiveTab }) => {
     try {
       user = JSON.parse(userStr);
     } catch (e) {
-      toast.error("❌ Invalid user data");
+      toast.error("Invalid user data");
       return;
     }
-
-    console.log("👤 User ID:", user.id);
-    console.log("🔄 Saving settings, logoPreview:", !!logoPreview, "length:", logoPreview?.length);
 
     const updatedSettings = {
       logo: logoPreview || null,
@@ -81,22 +74,13 @@ const GeneralSettings = ({ setActiveTab }) => {
       autoSave: true
     };
 
-    if (logoPreview) {
-      console.log("✅ Logo included in settings, size:", logoPreview.length);
-    }
-
     try {
-      // First, save to localStorage for immediate use
       localStorage.setItem("userSettings", JSON.stringify(updatedSettings));
-      console.log("✅ Settings saved to localStorage successfully");
 
-      // Then save to backend - this is critical for persistence
       if (user.id) {
-        console.log("📤 Sending company settings to backend for user:", user.id);
-        console.log("📊 Settings payload size:", JSON.stringify(updatedSettings).length);
-
+        const base = process.env.REACT_APP_API_URL || "http://localhost:5000";
         const backendRes = await fetch(
-          `http://localhost:5000/api/company-settings/${user.id}`,
+          `${base.replace(/\/$/, "")}/api/company-settings/${user.id}`,
           {
             method: "POST",
             headers: {
@@ -109,33 +93,23 @@ const GeneralSettings = ({ setActiveTab }) => {
 
         const backendData = await backendRes.json();
 
-        if (backendRes.ok) {
-          console.log("✅ Company settings saved to backend successfully");
-          console.log("📝 Backend response:", backendData);
-        } else {
-          console.error("❌ Backend error:", backendData.error);
-          toast.warning("⚠️ Settings saved locally but failed to sync with server: " + (backendData.error || "Unknown error"));
+        if (!backendRes.ok) {
+          toast.warning("Settings saved locally but failed to sync with server: " + (backendData.error || "Unknown error"));
         }
       } else {
-        console.warn("⚠️ No user ID found, cannot save to backend");
-        toast.warning("⚠️ Could not sync settings to server");
+        toast.warning("Could not sync settings to server");
       }
     } catch (e) {
-      console.error("❌ Error saving settings:", e);
       toast.error("Failed to save settings: " + e.message);
       return;
     }
 
-    // Dispatch custom event to notify other components about settings update
-    console.log("📢 Dispatching settingsUpdated event");
     window.dispatchEvent(new CustomEvent("settingsUpdated", {
       detail: updatedSettings,
       bubbles: true
     }));
 
-    // Also trigger storage event for same-page updates
     setTimeout(() => {
-      console.log("📢 Dispatching storage event");
       window.dispatchEvent(new StorageEvent('storage', {
         key: 'userSettings',
         newValue: JSON.stringify(updatedSettings),
@@ -144,7 +118,7 @@ const GeneralSettings = ({ setActiveTab }) => {
       }));
     }, 100);
 
-    toast.success("✅ Settings saved successfully!");
+    toast.success("Settings saved successfully!");
     setLogo(null);
   };
 

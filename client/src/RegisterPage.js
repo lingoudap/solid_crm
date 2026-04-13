@@ -49,7 +49,8 @@ const RegisterPage = ({ goToLogin, goToHome }) => {
         if (response.data.companySettings.companyName) setCompanyName(response.data.companySettings.companyName);
       }
 
-      goToHome();
+      // After registration, go to login page
+      goToLogin();
     } catch (error) {
       alert(error.response?.data?.message || 'Registration failed');
     } finally {

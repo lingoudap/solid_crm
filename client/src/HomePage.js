@@ -5,10 +5,12 @@ import Lead from "./Components/Leads/AddLead";
 import Quotation from "./Components/Quotation/AddQuotation";
 import AddCustomerForm from "./Components/Customer/AddCustomer";
 import Order from "./Components/Order/AddOrder";
+import AddInvoice from "./Components/Invoice/AddInvoice";
 import ViewCustomers from "./Components/Customer/ViewCustomer";
 import ViewLeads from "./Components/Leads/ViewLeads";
 import ViewQuotations from "./Components/Quotation/ViewQuotation";
 import ViewOrders from "./Components/Order/ViewOrder";
+import ViewInvoice from "./Components/Invoice/ViewInvoice";
 import ViewFollowUps from "./Components/FollowUps/ViewFollowUp";
 import Todo from "./Components/TODO/AddTodo";
 import ViewTodo from "./Components/TODO/ViewTodo";
@@ -18,10 +20,10 @@ import BulkUpload from "./Components/BulkUpload/BulkUpload";
 import CustomPrints from "./Components/CustomPrints/CustomPrints";
 import AddReport from "./Components/Reports/AddReport";
 import ViewReports from "./Components/Reports/ViewReports";
+import ReportDetails from "./Components/Reports/ReportDetails";
 import { useSettings } from "./context/SettingsContext";
-
-
-import DashboardCharts from "./Components/Dashboard/DashboardCharts";
+import DashboardCharts from "./Components/Dashboard/DashboardCharts.jsx";
+import NotificationBadge from "./Components/Notifications/NotificationBadge";
 
 const HomePage = ({ setCurrentPage, loggedInUser }) => {
   const { moduleSettings: settings, setModuleSettings } = useSettings();
@@ -36,17 +38,11 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
   const [expandedModule, setExpandedModule] = useState(null);
   const [activeSub, setActiveSub] = useState(null);
   const [appLogo, setAppLogo] = useState(null);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [notifications] = useState([
-    { id: 1, icon: "📝", text: "New quotation created", time: "5 mins ago" },
-    { id: 2, icon: "🎉", text: "Order confirmed", time: "1 hour ago" },
-    { id: 3, icon: "📞", text: "Follow-up reminder", time: "2 hours ago" },
-
-  ]);
+  const [viewingReportId, setViewingReportId] = useState(null);
 
   // Include Settings, Reports, Custom Prints in the sidebar
-  const modules = ["Lead", "Quotation", "Order", "Customer", "Follow-Up", "ToDo", "Reports", "Bulk Upload", "Custom Prints", "Settings"];
+  const modules = ["Lead", "Quotation", "Order", "Invoice", "Customer", "Follow-Up", "ToDo", "Reports", "Bulk Upload", "Custom Prints", "Settings"];
 
   const defaultBase = process.env.NODE_ENV === "development" ? "http://localhost:5000" : "";
   const apiUrl = process.env.REACT_APP_API_URL || defaultBase;
@@ -235,6 +231,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       Lead: "📈",
       Quotation: "📃",
       Order: "📦",
+      Invoice: "📄",
       Customer: "👥",
       "Follow-Up": "🔔",
       ToDo: "📝",
@@ -288,6 +285,13 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
               </div>
               <div className="stat-icon">📦</div>
             </div>
+            <div className="stat-card orders">
+              <div className="stat-content">
+                <div className="stat-label">Invoices</div>
+                <div className="stat-value">{ordersCount}</div>
+              </div>
+              <div className="stat-icon">📄</div>
+            </div>
     </div>
 
 
@@ -336,6 +340,11 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
         if (activeSub === "View")
           return <ViewOrders onRefreshParent={fetchOrdersCount} />;
         break;
+      case "Invoice":
+        if (activeSub === "Add") return <AddInvoice />;
+        if (activeSub === "View")
+          return <ViewInvoice />;
+        break;
       case "Customer":
         if (activeSub === "Add")
           return <AddCustomerForm onCustomerAdded={fetchCustomerCount} />;
@@ -357,8 +366,21 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       case "Settings":
         return <Settings />;
       case "Reports":
+        if (viewingReportId) {
+          return (
+            <ReportDetails
+              reportId={viewingReportId}
+              onBack={() => setViewingReportId(null)}
+            />
+          );
+        }
         if (activeSub === "Add") return <AddReport />;
-        if (activeSub === "View") return <ViewReports />;
+        if (activeSub === "View")
+          return (
+            <ViewReports
+              onViewReport={(reportId) => setViewingReportId(reportId)}
+            />
+          );
         break;
         
       default:
@@ -377,7 +399,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       <div className={`top-bar ${settings.theme === "dark" ? "dark" : "light"}`}>
         {/* LEFT SECTION: SIDEBAR TOGGLE & LOGO */}
         <div className="top-bar-left">
-          <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)} title="Toggle sidebar">
+          <button className="sidebar-toggle" onClick={() => { if (sidebarOpen) setExpandedModule(null); setSidebarOpen(!sidebarOpen); }} title="Toggle sidebar">
             {sidebarOpen ? "⬅️" : "➡️"}
           </button>
           
@@ -432,62 +454,14 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
               {settings.theme === "dark" ? "☀️" : "🌙"}
             </button>
 
-            {/* Notification Bell */}
-            <button 
-              className="notification-bell" 
-              title="Notifications"
-              onClick={() => {
-                setNotificationOpen(!notificationOpen);
-                setProfileOpen(false);
-              }}
-            >
-              🔔
-              {notifications.length > 0 && (
-                <span className="notification-badge">{notifications.length}</span>
-              )}
-            </button>
-
-            {/* Notification Dropdown */}
-            <div className={`dropdown-menu ${notificationOpen ? "active" : ""}`}>
-              <div className="dropdown-header">
-                📬 Notifications ({notifications.length})
-              </div>
-              {notifications.length > 0 ? (
-                notifications.map((notif) => (
-                  <div key={notif.id} className="dropdown-item">
-                    <span className="dropdown-item-icon">{notif.icon}</span>
-                    <div className="dropdown-item-text">
-                      <div>{notif.text}</div>
-                      <small style={{ color: "#999" }}>{notif.time}</small>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="dropdown-item">No notifications</div>
-              )}
-              {notifications.length > 0 && (
-                <div className="dropdown-item" style={{ background: "#f5f5f5", justifyContent: "center" }}>
-                  <button style={{ 
-                    border: "none", 
-                    background: "none", 
-                    color: "#007bff",
-                    cursor: "pointer",
-                    fontWeight: "600"
-                  }}>
-                    View All →
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Notification Badge with Panel */}
+            <NotificationBadge userId={loggedInUser?._id || loggedInUser?.id} />
 
             {/* Profile Button */}
             <button 
               className="profile-button" 
               title="User Profile"
-              onClick={() => {
-                setProfileOpen(!profileOpen);
-                setNotificationOpen(false);
-              }}
+              onClick={() => setProfileOpen(!profileOpen)}
             >
               👤
             </button>

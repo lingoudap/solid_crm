@@ -1,6 +1,7 @@
 import express from "express";
 import PDFDocument from "pdfkit";
 import Quotation from "../models/Quotation.js";
+import FollowUp from "../models/FollowUp.js";
 
 const router = express.Router();
 
@@ -91,7 +92,19 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const quotations = await Quotation.find().sort({ createdAt: -1 });
-    res.json(quotations);
+    
+    // Fetch follow-ups from FollowUp collection and attach to quotations
+    const quotationsWithFollowUps = await Promise.all(
+      quotations.map(async (quotation) => {
+        const followUps = await FollowUp.find({ relatedId: quotation._id, relatedType: "Quotation" }).sort({ followUpDate: 1 });
+        return {
+          ...quotation.toObject(),
+          followUpsNew: followUps
+        };
+      })
+    );
+    
+    res.json(quotationsWithFollowUps);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -143,6 +156,28 @@ router.get("/:id/export", async (req, res) => {
   } catch (error) {
     console.error("Error generating PDF:", error);
     res.status(500).json({ error: "Failed to generate PDF" });
+  }
+});
+
+/**
+ * ✅ Get Single Quotation
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) {
+      return res.status(404).json({ error: "Quotation not found" });
+    }
+    
+    // Fetch follow-ups from FollowUp collection
+    const followUps = await FollowUp.find({ relatedId: quotation._id, relatedType: "Quotation" }).sort({ followUpDate: 1 });
+    
+    res.json({
+      ...quotation.toObject(),
+      followUpsNew: followUps
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

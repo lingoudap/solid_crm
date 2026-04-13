@@ -42,6 +42,20 @@ const UserSchema = new mongoose.Schema({
       default: true
     }
   },
+
+  // Company profile info
+  companyProfile: {
+    companyName: { type: String, default: "" },
+    address: { type: String, default: "" },
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    pincode: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    email: { type: String, default: "" },
+    website: { type: String, default: "" },
+    gstNumber: { type: String, default: "" },
+    panNumber: { type: String, default: "" },
+  },
   
   createdAt: {
     type: Date,

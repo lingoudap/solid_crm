@@ -1,28 +1,46 @@
 /* Styles for DashboardCharts - match app-wide styles */
 .dashboard-charts-grid {
-  /* keep layout consistent with Home.css */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  background: #f5f7fa;
+  border-radius: 8px;
 }
 
 .chart-card {
-  padding: 14px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .chart-card h3 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #3b82f6;
+  padding-bottom: 10px;
 }
 
 /* Date inputs */
 .cal1 {
-  padding: 6px 10px;
-  border: 1px solid #dcdcdc;
+  padding: 8px 12px;
+  border: 1.5px solid #e5e7eb;
   border-radius: 6px;
-  background: #fff;
+  background: #f9fafb;
   color: #333;
   font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.cal1:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
 }
 
 .dark .cal1 {
@@ -33,12 +51,20 @@
 
 /* Select */
 .select1 {
-  padding: 7px 10px;
-  border: 1px solid #dcdcdc;
+  padding: 8px 12px;
+  border: 1.5px solid #e5e7eb;
   border-radius: 6px;
-  background: #fff;
+  background: #f9fafb;
   color: #333;
   font-size: 0.95rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.select1:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
 }
 
 .dark .select1 {
@@ -52,35 +78,73 @@
   background: #3498db;
   color: #fff;
   border: none;
-  padding: 7px 12px;
+  padding: 8px 16px;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn-apply:hover { opacity: 0.95; }
+.btn-apply:hover:not(:disabled) {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-apply:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .btn1, .btn2, .btn3, .btn4 {
-  background: transparent;
-  border: 1px solid #e0e0e0;
+  background: white;
+  border: 1.5px solid #e5e7eb;
   color: #333;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.btn1:hover, .btn2:hover, .btn3:hover, .btn4:hover { background: #f5f5f5; }
+.btn1:hover, .btn2:hover, .btn3:hover, .btn4:hover {
+  background: #f0f4ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.btn1.active, .btn2.active, .btn3.active, .btn4.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
 
 .dark .btn1, .dark .btn2, .dark .btn3, .dark .btn4 {
+  background: #2a2a2a;
   border-color: #555;
   color: #eee;
 }
 
+.dark .btn1:hover, .dark .btn2:hover, .dark .btn3:hover, .dark .btn4:hover {
+  background: #3a3a3a;
+  border-color: #777;
+}
+
 /* Graph container sizing */
 .combinedGraphContainer {
-  height: 260px;
+  height: 300px;
   width: 100%;
+  margin-top: 15px;
 }
 
 @media (max-width: 900px) {
-  .combinedGraphContainer { height: 220px; }
+  .combinedGraphContainer {
+    height: 250px;
+  }
+
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
 }

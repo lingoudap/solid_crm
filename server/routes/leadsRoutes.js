@@ -1,5 +1,6 @@
 import express from "express";
 import Lead from "../models/Leads.js";
+import FollowUp from "../models/FollowUp.js";
 import PDFDocument from "pdfkit";
 
 const router = express.Router();
@@ -45,9 +46,20 @@ router.get("/", async (req, res) => {
   try {
     console.log("📍 Fetching leads from collection...");
     const leads = await Lead.find().sort({ createdAt: -1 });
-    console.log("✅ Found", leads.length, "leads");
-    console.log("📊 Sample lead:", leads[0]);
-    res.json(leads);
+    
+    // Fetch follow-ups from FollowUp collection and attach to leads
+    const leadsWithFollowUps = await Promise.all(
+      leads.map(async (lead) => {
+        const followUps = await FollowUp.find({ relatedId: lead._id, relatedType: "Lead" }).sort({ followUpDate: 1 });
+        return {
+          ...lead.toObject(),
+          followUpsNew: followUps // Add follow-ups from the FollowUp collection
+        };
+      })
+    );
+    
+    console.log("✅ Found", leadsWithFollowUps.length, "leads with follow-ups");
+    res.json(leadsWithFollowUps);
   } catch (error) {
     console.error("❌ Error fetching leads:", error);
     res.status(500).json({ error: "Failed to fetch leads" });
@@ -61,7 +73,14 @@ router.get("/:id", async (req, res) => {
     if (!lead) {
       return res.status(404).json({ error: "Lead not found" });
     }
-    res.json(lead);
+    
+    // Fetch follow-ups from FollowUp collection
+    const followUps = await FollowUp.find({ relatedId: lead._id, relatedType: "Lead" }).sort({ followUpDate: 1 });
+    
+    res.json({
+      ...lead.toObject(),
+      followUpsNew: followUps
+    });
   } catch (error) {
     console.error("❌ Error fetching lead:", error);
     res.status(500).json({ error: "Failed to fetch lead" });

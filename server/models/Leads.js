@@ -10,6 +10,10 @@ const FollowUpSchema = new mongoose.Schema({
     type: String,
     required: [true, "Follow-up time is required"],
   },
+  assignedTo: {
+    type: String,
+    required: [true, "Follow-up assigned-to is required"],
+  },
   remark: {
     type: String,
     required: [true, "Remark is required"],
