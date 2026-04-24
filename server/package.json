@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "server": "nodemon index.js"
+    "server": "nodemon index.js",
+    "migrate:quotation-fields": "node scripts/backfillQuotationFields.js"
   },
   "keywords": [],
   "author": "",
@@ -18,11 +19,13 @@
     "csv-parser": "^3.2.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "pdfkit": "^0.17.2",
-    "recharts": "^3.2.1"
+    "recharts": "^3.2.1",
+    "xlsx": "^0.18.5"
   }
 }

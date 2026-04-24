@@ -29,6 +29,27 @@ const quotationSchema = new mongoose.Schema({
   totalAmount: { type: Number, required: true, min: 0 },
   customFields: { type: Object, default: {} },
 
+  // Lifecycle
+  status: {
+    type: String,
+    enum: ["New", "Active", "Converted", "Lost"],
+    default: "New",
+    index: true,
+  },
+  priority: {
+    type: String,
+    enum: ["Low", "Medium", "High"],
+    default: "Medium",
+    index: true,
+  },
+  nextFollowUpDate: { type: Date, default: null, index: true },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+    index: true,
+  },
+
   // Date
   date: { type: Date, default: Date.now },
 }, { timestamps: true }); // ✅ adds createdAt, updatedAt
