@@ -2,6 +2,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./quotation.css";
 
+import QUOTATION_CONFIG, { isFeatureEnabled } from "./config";
+
 import { useQuotations } from "./hooks/useQuotations";
 import { useQuotationFilters } from "./hooks/useQuotationFilters";
 import { useQuotationSort } from "./hooks/useQuotationSort";
@@ -20,16 +22,6 @@ import QuotationPagination from "./components/QuotationPagination";
 import ViewQuotationModal from "./components/modals/ViewQuotationModal";
 import EditQuotationModal from "./components/modals/EditQuotationModal";
 import AddFollowUpModal from "./components/modals/AddFollowUpModal";
-
-const DEFAULT_COLUMNS = {
-  quotationNo: true,
-  customer: true,
-  amount: true,
-  status: true,
-  followups: true,
-  nextFollowup: true,
-  date: true,
-};
 
 const LoadingSkeleton = () => (
   <div className="loading-skeleton">
@@ -71,7 +63,7 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
     useQuotationSort(filteredQuotes);
 
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
+  const [perPage, setPerPage] = useState(QUOTATION_CONFIG.UI.ITEMS_PER_PAGE);
   const pageCount = Math.max(1, Math.ceil(sortedQuotations.length / perPage));
   const pageData = sortedQuotations.slice(
     (page - 1) * perPage,
@@ -100,7 +92,7 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
 
   const [visibleColumns, setVisibleColumns] = useLocalStorageState(
     "viewQuotationsColumns",
-    DEFAULT_COLUMNS
+    QUOTATION_CONFIG.COLUMNS
   );
   const [savedFilters, setSavedFilters] = useLocalStorageState(
     "viewQuotationsSavedFilters",
@@ -343,12 +335,14 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
         onPageChange={setPage}
       />
 
-      <QuotationBulkActionBar
-        count={selectedQuotations.length}
-        onStatusChange={handleBulkStatusChange}
-        onExportCSV={handleBulkExportCSV}
-        onDelete={handleBulkDelete}
-      />
+      {isFeatureEnabled("BULK_OPERATIONS") && (
+        <QuotationBulkActionBar
+          count={selectedQuotations.length}
+          onStatusChange={handleBulkStatusChange}
+          onExportCSV={handleBulkExportCSV}
+          onDelete={handleBulkDelete}
+        />
+      )}
 
       {loading ? (
         <LoadingSkeleton />

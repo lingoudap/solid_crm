@@ -1,4 +1,5 @@
 import React from "react";
+import QUOTATION_CONFIG from "../config";
 
 export default function QuotationFilterDrawer({
   open,
@@ -27,10 +28,11 @@ export default function QuotationFilterDrawer({
               className="filter-select"
             >
               <option value="all">All Status</option>
-              <option value="New">New</option>
-              <option value="Active">Active</option>
-              <option value="Converted">Converted</option>
-              <option value="Lost">Lost</option>
+              {QUOTATION_CONFIG.STATUS_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

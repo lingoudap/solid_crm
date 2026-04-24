@@ -1,4 +1,5 @@
 import React from "react";
+import QUOTATION_CONFIG from "../config";
 
 export default function QuotationBulkActionBar({
   count,
@@ -19,10 +20,11 @@ export default function QuotationBulkActionBar({
         className="bulk-status-select"
       >
         <option value="">Change Status</option>
-        <option value="New">New</option>
-        <option value="Active">Active</option>
-        <option value="Converted">Converted</option>
-        <option value="Lost">Lost</option>
+        {QUOTATION_CONFIG.STATUS_OPTIONS.map((s) => (
+          <option key={s.value} value={s.value}>
+            {s.label}
+          </option>
+        ))}
       </select>
       <button onClick={onExportCSV} className="bulk-export-btn">
         📥 Export CSV
