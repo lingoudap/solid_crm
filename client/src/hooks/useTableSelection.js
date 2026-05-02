@@ -1,6 +1,12 @@
 import { useCallback, useState } from "react";
 
-export function useQuotationSelection(pageIds) {
+/**
+ * Generic page-scoped row selection. Pass in the array of IDs visible on the
+ * current page; the hook tracks which are selected and exposes toggles.
+ *
+ * `isAllSelected` reflects only the current page (not the full dataset).
+ */
+export function useTableSelection(pageIds) {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const toggleSelect = useCallback((id) => {

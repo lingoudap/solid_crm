@@ -1,0 +1,316 @@
+/* Orders module styles
+ *
+ * This file defines only Order-specific styles: the status pill palette
+ * (.ot-status-*), the source-quotation backlink (.ot-source-pill), and the
+ * 6-column stats bar (.ot-stats-bar / .ot-stat-*). Everything else is
+ * borrowed from sibling modules.
+ *
+ * ===== EXTERNAL CSS DEPENDENCY MANIFEST =====
+ * If any of the classes below are renamed/removed in their source file,
+ * the Orders page will silently break (no compile-time check). Before
+ * refactoring quotation.css or AddLead.css, grep this file for the old
+ * name to discover the dependency.
+ *
+ * From client/src/Components/Quotation/quotation.css:
+ *   - Toolbar:  .qt-toolbar, .qt-toolbar-group, .qt-toolbar-left,
+ *               .qt-toolbar-center, .qt-toolbar-right, .qt-toolbar-search,
+ *               .qt-toolbar-search-icon, .qt-toolbar-search-clear,
+ *               .qt-toolbar-slot, .qt-toolbar-datewrap, .qt-tb-btn,
+ *               .qt-tb-btn--secondary, .qt-tb-btn--icon, .qt-tb-badge
+ *   - Table:    .qt-wrap, .qt-table, .qt-row, .qt-customer, .qt-avatar,
+ *               .qt-customer-meta, .qt-customer-name, .qt-customer-sub,
+ *               .qt-quote-no, .qt-index, .qt-num, .qt-amount, .qt-muted,
+ *               .qt-actions, .qt-actions-cell, .qt-actions-col,
+ *               .qt-icon-btn, .qt-icon-btn-more, .qt-actions-menu,
+ *               .qt-actions-menu-item, .qt-actions-menu-item-passthrough,
+ *               .qt-actions-menu-divider
+ *   - View modal scope:  .vqm-* (header, body, section, grid, field,
+ *                        value, items table, total, footer)
+ *   - Edit modal scope:  .eqm-* (header, form, section, grid, field,
+ *                        items table, add/remove btn, total, footer)
+ *   - Dropdowns: .columns-btn, .columns-dropdown, .column-toggle-item,
+ *               .saved-filters-btn, .saved-filters-dropdown,
+ *               .saved-filters-save, .saved-filter-input,
+ *               .save-filter-btn, .saved-filter-item,
+ *               .delete-filter-btn, .no-saved-filters
+ *
+ * From client/src/Components/Leads/AddLead.css:
+ *   - Page shell: .leads-container, .leads-page-header, .leads-title,
+ *                 .leads-header-actions, .refresh-btn
+ *   - Bulk:       .bulk-action-bar, .bulk-status-select,
+ *                 .bulk-export-btn, .bulk-delete-btn
+ *   - Pagination: .pagination, .entries-control, .entries-info,
+ *                 .entries-buttons
+ *   - States:     .empty-state, .empty-state-icon, .empty-state-title,
+ *                 .empty-state-text, .loading-skeleton, .skeleton-row,
+ *                 .skeleton-cell
+ *   - Filter drawer: .filter-drawer, .filter-overlay,
+ *                    .filter-drawer-header, .filter-drawer-close,
+ *                    .filter-drawer-content, .filter-drawer-footer,
+ *                    .filter-group, .filter-input, .filter-select,
+ *                    .filter-apply-btn, .filter-reset-btn
+ *
+ * Modal primitives shared across modules (defined in quotation.css):
+ *   .modal-overlay, .modal-content, .save-btn, .cancel-btn
+ */
+
+/* ===== Order status badges (.ot-status-*) ===== */
+.ot-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.ot-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ot-status-new {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+.ot-status-processing {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.ot-status-shipped {
+  background: #e0e7ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.ot-status-delivered {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #d1fae5;
+}
+
+.ot-status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fee2e2;
+}
+
+/* ===== Source-quotation backlink pill ===== */
+.ot-source-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: 1px solid #ede9fe;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ===== Order stats bar (.ot-stats-bar) =====
+ * Order-semantic 6-column grid. Replaces the reused .leads-stats-bar (which
+ * was a 5-col grid) to fit Total + 5 statuses without overflow, and gives
+ * each status its own colour matching the corresponding .ot-status-* pill.
+ */
+.ot-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ot-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ot-stat-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.ot-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6b7280;
+}
+
+.ot-stat-value {
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.ot-stat-total .ot-stat-label   { color: #475569; }
+.ot-stat-total .ot-stat-value   { color: #1e293b; }
+.ot-stat-new .ot-stat-label     { color: #3b82f6; }
+.ot-stat-new .ot-stat-value     { color: #1e40af; }
+.ot-stat-processing .ot-stat-label { color: #f59e0b; }
+.ot-stat-processing .ot-stat-value { color: #b45309; }
+.ot-stat-shipped .ot-stat-label    { color: #6366f1; }
+.ot-stat-shipped .ot-stat-value    { color: #4338ca; }
+.ot-stat-delivered .ot-stat-label  { color: #10b981; }
+.ot-stat-delivered .ot-stat-value  { color: #047857; }
+.ot-stat-cancelled .ot-stat-label  { color: #ef4444; }
+.ot-stat-cancelled .ot-stat-value  { color: #991b1b; }
+
+@media (max-width: 1100px) {
+  .ot-stats-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .ot-stats-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* "Convert to Invoice" item — green tint to flag the terminal action */
+.ot-actions-menu-item-invoice svg {
+  color: #047857;
+}
+
+.ot-actions-menu-item-invoice:hover {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+}
+
+.ot-actions-menu-item-invoice:hover svg {
+  color: #047857 !important;
+}
+
+/* ===== Update Status Modal (.usm-*) ===== */
+.usm-overlay {
+  padding: 24px;
+}
+
+.modal-content.usm-modal {
+  width: min(440px, 100%);
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.usm-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eef0f3;
+  background: linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+}
+
+.usm-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
+.usm-subtitle {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #eef4ff;
+  color: #1d4ed8;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.usm-close {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.usm-close:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.usm-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.usm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 20px 0;
+}
+
+.usm-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.usm-field select,
+.usm-field textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.usm-field select:focus,
+.usm-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.usm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+  border-top: 1px solid #eef0f3;
+  background: #fafbfc;
+}

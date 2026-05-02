@@ -3,6 +3,8 @@
  * Handles template management with both localStorage and API support
  */
 
+import axios from "axios";
+
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const STORAGE_KEY = "customPrintTemplates";
 const USE_API = process.env.REACT_APP_USE_TEMPLATE_API === "true"; // Set to true to use API instead of localStorage
@@ -239,6 +241,96 @@ export const syncLocalStorageToAPI = async () => {
     return { message: `Synced ${synced} templates to API` };
   } catch (error) {
     console.error("❌ Error syncing templates:", error);
+    throw error;
+  }
+};
+
+// ====== AXIOS-BASED API FUNCTIONS ======
+// Modern axios-based functions for template management
+
+/**
+ * Fetch all templates for a specific module using axios
+ * @param {string} module - Module name (Lead, Quotation, Customer, Order)
+ * @returns {Promise} Response with template data
+ */
+export const getTemplatesAxios = async (module) => {
+  try {
+    const url = `${API_BASE.replace(/\/$/, "")}/api/templates?module=${module}`;
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error(`❌ Error fetching ${module} templates:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Create a new template using axios
+ * @param {object} data - Template data (name, module, content, isDefault, etc.)
+ * @returns {Promise} Response with created template
+ */
+export const createTemplateAxios = async (data) => {
+  try {
+    console.log("📤 Creating new template...");
+    const url = `${API_BASE.replace(/\/$/, "")}/api/templates`;
+    const response = await axios.post(url, data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error creating template:", error);
+    throw error;
+  }
+};
+
+/**
+ * Update an existing template using axios
+ * @param {string} id - Template ID
+ * @param {object} data - Updated template data
+ * @returns {Promise} Response with updated template
+ */
+export const updateTemplateAxios = async (id, data) => {
+  try {
+    console.log("📤 Updating template...", id);
+    const url = `${API_BASE.replace(/\/$/, "")}/api/templates/${id}`;
+    const response = await axios.put(url, data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error updating template:", error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a template using axios
+ * @param {string} id - Template ID
+ * @returns {Promise} Response confirming deletion
+ */
+export const deleteTemplateAxios = async (id) => {
+  try {
+    console.log("🗑️ Deleting template...", id);
+    const url = `${API_BASE.replace(/\/$/, "")}/api/templates/${id}`;
+    const response = await axios.delete(url);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error deleting template:", error);
+    throw error;
+  }
+};
+
+/**
+ * Set a template as default for its module using axios
+ * @param {string} id - Template ID
+ * @returns {Promise} Response with updated template
+ */
+export const setDefaultTemplateAxios = async (id) => {
+  try {
+    console.log("⭐ Setting default template...", id);
+    const url = `${API_BASE.replace(/\/$/, "")}/api/templates/${id}`;
+    const response = await axios.put(url, {
+      isDefault: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("❌ Error setting default template:", error);
     throw error;
   }
 };

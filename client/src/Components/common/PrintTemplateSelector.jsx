@@ -1,21 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
-import { getTemplates, convertAPITemplateToLocal } from "../../services/templateService";
-import { generatePDFFromTemplate, loadPrintLibraries } from "../../utils/printTemplateUtils";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-toastify";
 import "./PrintTemplateSelector.css";
 
 /**
  * PrintTemplateSelector Component
- * Allows users to select a template and print/preview the document
- * Supports both localStorage and API-based templates
+ * Reusable component for selecting a template and printing/downloading records
+ * Uses backend PDF generation with Puppeteer
+ * 
+ * Props:
+ * - module: 'Invoice' | 'Quotation' | 'Lead' | 'Order' (must match Template model enum)
+ * - recordId: MongoDB ID of the record to print
+ * - recordName: Display name for the record (e.g., "Invoice INV-001"), optional
+ * - onPrint: Callback function after successful print, optional
  */
-const PrintTemplateSelector = ({ module, record, onPrint }) => {
+const PrintTemplateSelector = ({ module, recordId, recordName = "Document", onPrint }) => {
   const [templates, setTemplates] = useState([]);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [showSelector, setShowSelector] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState(false);
+  const [fetchingTemplates, setFetchingTemplates] = useState(false);
   const [error, setError] = useState(null);
-  const printRef = useRef(null);
 
   // Load templates when module changes
   useEffect(() => {
@@ -23,316 +27,219 @@ const PrintTemplateSelector = ({ module, record, onPrint }) => {
   }, [module]);
 
   const loadTemplates = async () => {
-    setLoading(true);
+    if (!module) return;
+    
+    setFetchingTemplates(true);
     setError(null);
     try {
-      const loadedTemplates = await getTemplates(module);
+      const response = await axios.get(`/api/templates?module=${module}`);
 
-      // Handle both API (array) and localStorage (object) formats
-      const templatesArray = Array.isArray(loadedTemplates)
-        ? loadedTemplates.map(convertAPITemplateToLocal)
-        : Object.entries(loadedTemplates).map(([id, t]) => ({ ...t, id }));
+      if (response.data.success && Array.isArray(response.data.data)) {
+        const templatesArray = response.data.data;
+        setTemplates(templatesArray);
 
-      setTemplates(templatesArray);
-
-      // Auto-select default template if available
-      const defaultTemplate = templatesArray.find((t) => t.isDefault) || templatesArray[0];
-      if (defaultTemplate) {
-        setSelectedTemplate(defaultTemplate);
+        // Auto-select default template if available
+        const defaultTemplate = templatesArray.find((t) => t.isDefault);
+        if (defaultTemplate) {
+          setSelectedTemplate(defaultTemplate._id);
+        } else if (templatesArray.length > 0) {
+          // If no default, select the first one
+          setSelectedTemplate(templatesArray[0]._id);
+        }
+      } else {
+        const errorMsg = "Failed to load templates";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error("❌ Error loading templates:", err);
-      setError("Failed to load templates");
+      const errorMsg = err.response?.data?.error || "Failed to load templates. Please try again.";
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setFetchingTemplates(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    if (!recordId) {
+      const msg = "Record ID is missing";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    if (templates.length === 0) {
+      const msg = "No templates available for printing";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Build URL with query parameters
+      let url = `/api/print/generate?module=${module}&recordId=${recordId}`;
+
+      // Add template ID if selected
+      if (selectedTemplate) {
+        url += `&templateId=${selectedTemplate}`;
+      }
+
+      // Open in new window for printing
+      const printWindow = window.open(url, "_blank");
+      if (!printWindow) {
+        toast.error("Pop-up blocked. Please allow pop-ups in your browser.");
+        return;
+      }
+      
+      if (onPrint) {
+        onPrint(selectedTemplate);
+      }
+      toast.success("Opening print preview...");
+    } catch (err) {
+      console.error("❌ Error printing:", err);
+      const errorMsg = "Failed to open print preview";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrint = async () => {
-    if (!selectedTemplate) {
-      setError("Please select a template first");
+  const handleDownload = async () => {
+    if (!recordId) {
+      const msg = "Record ID is missing";
+      setError(msg);
+      toast.error(msg);
       return;
     }
 
-    setLoading(true);
+    if (templates.length === 0) {
+      const msg = "No templates available for downloading";
+      setError(msg);
+      toast.error(msg);
+      return;
+    }
+
     try {
-      // Load print libraries
-      await loadPrintLibraries();
+      setLoading(true);
+      setError(null);
 
-      // Generate PDF
-      const companyName = localStorage.getItem("companyName") || "Company";
-      const result = await generatePDFFromTemplate(selectedTemplate, record, companyName);
+      // Build URL with query parameters
+      let url = `/api/print/download?module=${module}&recordId=${recordId}`;
 
-      if (result && result.success !== false) {
-        if (onPrint) {
-          onPrint(selectedTemplate);
-        }
-        setShowSelector(false);
+      // Add template ID if selected
+      if (selectedTemplate) {
+        url += `&templateId=${selectedTemplate}`;
       }
+
+      // Trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${module}-${recordId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("Downloading PDF...");
     } catch (err) {
-      console.error("❌ Error printing:", err);
-      setError(err.message || "Failed to print");
+      console.error("❌ Error downloading:", err);
+      const errorMsg = "Failed to download PDF";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   const handlePreview = () => {
-    setPreview(true);
+    // Preview opens in existing tab/window
+    handlePrint();
   };
 
-  if (!templates || templates.length === 0) {
+  // Render loading state
+  if (fetchingTemplates) {
     return (
       <div className="print-template-selector">
-        <button
-          className="print-btn disabled"
-          disabled
-          title="No templates available"
-        >
+        <select disabled className="template-select">
+          <option>Loading templates...</option>
+        </select>
+        <button disabled className="print-btn">
+          ⏳ Loading...
+        </button>
+      </div>
+    );
+  }
+
+  // Render no templates state
+  if (templates.length === 0) {
+    return (
+      <div className="print-template-selector">
+        <div className="error-message">⚠️ No templates available for {module}</div>
+        <select disabled className="template-select">
+          <option>No templates available</option>
+        </select>
+        <button disabled className="print-btn" title="Create templates first">
           📄 No Templates
         </button>
-        <p className="help-text">Create a print template in the CustomPrints section first</p>
+        <button onClick={loadTemplates} className="retry-btn" title="Refresh template list">
+          🔄 Retry
+        </button>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="print-template-selector">
-        <button
-          className="print-btn"
-          onClick={() => setShowSelector(!showSelector)}
-          title={`Print with template${selectedTemplate ? `: ${selectedTemplate.name}` : ""}`}
-        >
-          🖨️ Print
-        </button>
+    <div className="print-template-selector">
+      {/* Error message */}
+      {error && <div className="error-message">⚠️ {error}</div>}
 
-        {showSelector && (
-          <div className="template-dropdown">
-            {error && <div className="error-message">⚠️ {error}</div>}
+      {/* Template Selector */}
+      <select
+        value={selectedTemplate}
+        onChange={(e) => {
+          setSelectedTemplate(e.target.value);
+          setError(null);
+        }}
+        disabled={loading}
+        className="template-select"
+        title="Select a print template"
+      >
+        <option value="">
+          {templates.length === 0 ? "No templates" : "Select template (or use default)"}
+        </option>
+        {templates.map((template) => (
+          <option key={template._id} value={template._id}>
+            {template.name}
+            {template.isDefault ? " (Default)" : ""}
+          </option>
+        ))}
+      </select>
 
-            <div className="template-list">
-              <label className="dropdown-label">Select Template:</label>
-              <select
-                value={selectedTemplate?.id || ""}
-                onChange={(e) => {
-                  const template = templates.find((t) => t.id === e.target.value);
-                  setSelectedTemplate(template);
-                  setError(null);
-                }}
-                className="template-select"
-                disabled={loading}
-              >
-                <option value="">-- Choose a template --</option>
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name}
-                    {template.isDefault ? " (Default)" : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Print Button (View in browser) */}
+      <button
+        onClick={handlePrint}
+        disabled={loading || !recordId || templates.length === 0}
+        className="print-btn print-view-btn"
+        title={templates.length === 0 ? "No templates available - create one first" : `Print ${recordName} in browser`}
+      >
+        {loading ? "⏳ Opening..." : "🖨️ Print"}
+      </button>
 
-            {selectedTemplate && (
-              <div className="template-info">
-                <p>
-                  <strong>Paper:</strong> {selectedTemplate.paperSize}{" "}
-                  {selectedTemplate.orientation}
-                </p>
-                <p>
-                  <strong>Fields:</strong> {selectedTemplate.bodyFields.length}
-                </p>
-              </div>
-            )}
-
-            <div className="template-actions">
-              <button
-                onClick={handlePreview}
-                className="preview-btn"
-                disabled={!selectedTemplate || loading}
-              >
-                👁️ Preview
-              </button>
-              <button
-                onClick={handlePrint}
-                className="print-action-btn"
-                disabled={!selectedTemplate || loading}
-              >
-                {loading ? "⏳ Processing..." : "🖨️ Print"}
-              </button>
-              <button
-                onClick={() => setShowSelector(false)}
-                className="close-btn"
-              >
-                ✕ Close
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Print Preview Modal */}
-      {preview && selectedTemplate && (
-        <QuotationPrintPreview
-          template={selectedTemplate}
-          record={record}
-          onClose={() => setPreview(false)}
-          onPrint={handlePrint}
-          ref={printRef}
-        />
-      )}
-    </>
-  );
-};
-
-/**
- * QuotationPrintPreview Component
- * Renders the quotation formatted according to the template
- */
-const QuotationPrintPreview = React.forwardRef(({ template, record, onClose, onPrint }, ref) => {
-  const handlePrint = () => {
-    if (window.print) {
-      window.print();
-    }
-    onPrint && onPrint();
-  };
-
-  // Map field IDs to record values
-  const getFieldValue = (fieldId) => {
-    // Handle nested fields like items.0.name
-    const parts = fieldId.split(".");
-    let value = record;
-
-    for (const part of parts) {
-      if (value && typeof value === "object") {
-        value = value[part];
-      } else {
-        value = null;
-        break;
-      }
-    }
-
-    return value !== null && value !== undefined ? value : "-";
-  };
-
-  const formatValue = (value) => {
-    if (Array.isArray(value)) {
-      return value.join(", ");
-    }
-    if (typeof value === "object" && value !== null) {
-      return JSON.stringify(value, null, 2);
-    }
-    return String(value);
-  };
-
-  return (
-    <div className="print-preview-modal">
-      <div className="print-preview-header">
-        <h3>Print Preview</h3>
-        <button onClick={onClose} className="close-preview-btn">
-          ✕
-        </button>
-      </div>
-
-      <div className="print-preview-content" ref={ref}>
-        <div
-          className={`print-document ${template.orientation}`}
-          style={{
-            padding: `${template.margins.top}mm ${template.margins.right}mm ${template.margins.bottom}mm ${template.margins.left}mm`,
-            fontFamily: template.fontFamily,
-            fontSize: template.fontSize,
-            lineHeight: template.lineSpacing,
-            position: "relative",
-            backgroundColor: "#fff",
-          }}
-        >
-          {/* Watermark */}
-          {template.watermark && (
-            <div
-              className="watermark"
-              style={{
-                opacity: template.watermarkOpacity,
-                position: "fixed",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%) rotate(-45deg)",
-                fontSize: "60px",
-                color: "#ccc",
-                zIndex: 0,
-                pointerEvents: "none",
-              }}
-            >
-              {template.watermark}
-            </div>
-          )}
-
-          {/* Header */}
-          {template.headerContent && (
-            <div className="print-header">
-              {template.headerContent.split("\n").map((line, idx) => (
-                <p key={idx}>{line}</p>
-              ))}
-            </div>
-          )}
-
-          {/* Title */}
-          <h1 style={{ marginBottom: "20px", textAlign: "center" }}>
-            {record.moduleName || template.module}
-          </h1>
-
-          {/* Body Fields */}
-          <div className="print-body">
-            {template.bodyFields.map((fieldId) => (
-              <div key={fieldId} className="field-row">
-                <span className="field-label">
-                  {fieldId.replace(/([A-Z])/g, " $1").trim()}:
-                </span>
-                <span className="field-value">
-                  {formatValue(getFieldValue(fieldId))}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer */}
-          {template.footerContent && (
-            <div className="print-footer">
-              {template.footerContent.split("\n").map((line, idx) => (
-                <p key={idx}>{line}</p>
-              ))}
-            </div>
-          )}
-
-          {/* Signature */}
-          {template.showSignature && (
-            <div className="signature-area">
-              <p>_____________________</p>
-              <p>Authorized Signature</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="print-preview-footer">
-        <button onClick={handlePrint} className="print-now-btn">
-          🖨️ Print Now
-        </button>
-        <button onClick={onClose} className="cancel-btn">
-          Cancel
-        </button>
-      </div>
-
-      <style>{`
-        @media print {
-          .print-preview-modal {
-            display: none;
-          }
-        }
-      `}</style>
+      {/* Download Button (Save as PDF) */}
+      <button
+        onClick={handleDownload}
+        disabled={loading || !recordId || templates.length === 0}
+        className="print-btn print-download-btn"
+        title={templates.length === 0 ? "No templates available - create one first" : `Download ${recordName} as PDF`}
+      >
+        {loading ? "⏳ Downloading..." : "⬇️ Download"}
+      </button>
     </div>
   );
-});
-
-QuotationPrintPreview.displayName = "QuotationPrintPreview";
+};
 
 export default PrintTemplateSelector;

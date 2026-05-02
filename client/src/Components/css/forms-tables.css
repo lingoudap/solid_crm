@@ -38,6 +38,22 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .add-form {
+    margin-left: 5px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-form {
+    margin: 10px 5px;
+    padding: 15px;
+    margin-left: 5px;
+  }
 }
 
 .dark .add-form {
@@ -69,6 +85,28 @@
   flex-direction: column;
   flex: 1 1 calc(50% - 20px); /* 2 columns by default */
   min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    gap: 15px;
+  }
+
+  .form-group {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    gap: 10px;
+  }
+
+  .form-group {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
 }
 
 .form-group label {
@@ -267,7 +305,7 @@ textarea {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
+  margin: 0px 0;
   background: white;
   border-radius: 8px;
   overflow: hidden;

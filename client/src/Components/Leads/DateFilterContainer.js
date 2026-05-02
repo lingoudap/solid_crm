@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import "./datefilter.css";
 
 const DateFilterContainer = ({
   startDate,
@@ -13,7 +14,18 @@ const DateFilterContainer = ({
   const [tempEndDate, setTempEndDate] = React.useState(endDate || null);
   const [customFromDate, setCustomFromDate] = React.useState("");
   const [customToDate, setCustomToDate] = React.useState("");
+  const [selectedPreset, setSelectedPreset] = React.useState(null);
   const dateFilterRef = useRef(null);
+
+  // Sync temp dates with applied dates when dropdown opens
+  useEffect(() => {
+    if (dateFilterOpen) {
+      setTempStartDate(startDate || null);
+      setTempEndDate(endDate || null);
+      setCustomFromDate("");
+      setCustomToDate("");
+    }
+  }, [dateFilterOpen, startDate, endDate]);
 
   const getDatePresets = () => {
     const today = new Date();
@@ -79,6 +91,7 @@ const DateFilterContainer = ({
       setTempEndDate(presets[preset].end);
       setCustomFromDate("");
       setCustomToDate("");
+      setSelectedPreset(preset);
     }
   };
 
@@ -86,10 +99,12 @@ const DateFilterContainer = ({
     if (from) {
       setCustomFromDate(from);
       setTempStartDate(new Date(from));
+      setSelectedPreset(null);
     }
     if (to) {
       setCustomToDate(to);
       setTempEndDate(new Date(to));
+      setSelectedPreset(null);
     }
   };
 
@@ -106,6 +121,10 @@ const DateFilterContainer = ({
     setCustomFromDate("");
     setCustomToDate("");
     setDateFilterOpen(false);
+  };
+
+  const isPresetActive = (preset) => {
+    return selectedPreset === preset;
   };
 
   // Handle click outside to close dropdown
@@ -126,6 +145,37 @@ const DateFilterContainer = ({
     };
   }, [dateFilterOpen, setDateFilterOpen]);
 
+  // Determine which preset is active based on applied dates
+  useEffect(() => {
+    if (!dateFilterOpen || !tempStartDate || !tempEndDate) {
+      return;
+    }
+
+    const presets = getDatePresets();
+    let foundPreset = null;
+
+    for (const [presetName, presetData] of Object.entries(presets)) {
+      const tempStart = new Date(tempStartDate);
+      const tempEnd = new Date(tempEndDate);
+      const presetStart = new Date(presetData.start);
+      const presetEnd = new Date(presetData.end);
+
+      tempStart.setHours(0, 0, 0, 0);
+      tempEnd.setHours(0, 0, 0, 0);
+      presetStart.setHours(0, 0, 0, 0);
+      presetEnd.setHours(0, 0, 0, 0);
+
+      if (tempStart.getTime() === presetStart.getTime() && tempEnd.getTime() === presetEnd.getTime()) {
+        foundPreset = presetName;
+        break;
+      }
+    }
+
+    if (foundPreset) {
+      setSelectedPreset(foundPreset);
+    }
+  }, [dateFilterOpen, tempStartDate, tempEndDate]);
+
   return (
     <div className="date-filter-container" ref={dateFilterRef}>
       <button
@@ -140,16 +190,16 @@ const DateFilterContainer = ({
         <div className="date-filter-dropdown">
           <div className="date-filter-dropdown-header">Select Date Range</div>
           <div className="date-filter-presets">
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('today')}>Today</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('yesterday')}>Yesterday</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('last7Days')}>Last 7 Days</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('last30Days')}>Last 30 Days</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('thisMonth')}>This Month</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('lastMonth')}>Last Month</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('yearToDate')}>Year to Date</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('companyStartDate')}>Company StartDate</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('thisFinancialYear')}>This FY</button>
-            <button className="date-preset-btn" onClick={() => handlePresetSelect('lastFinancialYear')}>Last FY</button>
+            <button className={`date-preset-btn ${isPresetActive('today') ? 'active' : ''}`} onClick={() => handlePresetSelect('today')}>Today</button>
+            <button className={`date-preset-btn ${isPresetActive('yesterday') ? 'active' : ''}`} onClick={() => handlePresetSelect('yesterday')}>Yesterday</button>
+            <button className={`date-preset-btn ${isPresetActive('last7Days') ? 'active' : ''}`} onClick={() => handlePresetSelect('last7Days')}>Last 7 Days</button>
+            <button className={`date-preset-btn ${isPresetActive('last30Days') ? 'active' : ''}`} onClick={() => handlePresetSelect('last30Days')}>Last 30 Days</button>
+            <button className={`date-preset-btn ${isPresetActive('thisMonth') ? 'active' : ''}`} onClick={() => handlePresetSelect('thisMonth')}>This Month</button>
+            <button className={`date-preset-btn ${isPresetActive('lastMonth') ? 'active' : ''}`} onClick={() => handlePresetSelect('lastMonth')}>Last Month</button>
+            <button className={`date-preset-btn ${isPresetActive('yearToDate') ? 'active' : ''}`} onClick={() => handlePresetSelect('yearToDate')}>Year to Date</button>
+            <button className={`date-preset-btn ${isPresetActive('companyStartDate') ? 'active' : ''}`} onClick={() => handlePresetSelect('companyStartDate')}>Company StartDate</button>
+            <button className={`date-preset-btn ${isPresetActive('thisFinancialYear') ? 'active' : ''}`} onClick={() => handlePresetSelect('thisFinancialYear')}>This FY</button>
+            <button className={`date-preset-btn ${isPresetActive('lastFinancialYear') ? 'active' : ''}`} onClick={() => handlePresetSelect('lastFinancialYear')}>Last FY</button>
           </div>
           <div className="date-filter-custom">
             <div className="custom-date-inputs">

@@ -53,7 +53,7 @@
 }
 /* Main Content Area */
 .main-content {
-  padding: 20px;
+  padding: 0px;
   display: flex;
   flex-direction: column;
   width: 100%;

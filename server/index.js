@@ -19,12 +19,15 @@ import Notification from "./models/Notification.js";
 // Routes
 import followUpRoutes from "./routes/followUps.js";
 import quotationRoutes from "./routes/quotationRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 import leadsRoutes from "./routes/leadsRoutes.js";
 import bulkUploadRoutes from "./routes/bulkUploadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
+import printRoutes from "./routes/printRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+//  import quotationRoutes from './routes/quotationRoutesEnhanced.js';
 
 // Config
 import connectDB from "./config/db.js";
@@ -158,11 +161,36 @@ app.post("/api/customers", async (req, res) => {
 
 app.get("/api/customers", async (req, res) => {
   try {
-    const customers = await Customer.find();
+    const customers = await Customer.find().sort({ createdAt: -1 });
     res.json(customers);
   } catch (error) {
     console.error("Error fetching customers:", error);
     res.status(500).json({ error: "Failed to fetch customers" });
+  }
+});
+
+app.put("/api/customers/:id", async (req, res) => {
+  try {
+    const updated = await Customer.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updated) return res.status(404).json({ error: "Customer not found" });
+    res.json({ message: "Customer updated successfully!", customer: updated });
+  } catch (error) {
+    console.error("Error updating customer:", error);
+    res.status(500).json({ error: "Failed to update customer" });
+  }
+});
+
+app.delete("/api/customers/:id", async (req, res) => {
+  try {
+    const deleted = await Customer.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: "Customer not found" });
+    res.json({ message: "Customer deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting customer:", error);
+    res.status(500).json({ error: "Failed to delete customer" });
   }
 });
 
@@ -291,9 +319,11 @@ console.log("📝 Registering API routes...");
 // Register specific routes FIRST (before generic ones)
 app.use("/api/followups", followUpRoutes);
 app.use("/api/quotations", quotationRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/leads", leadsRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/templates", templateRoutes);
+app.use("/api/print", printRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/notifications", notificationRoutes);
 

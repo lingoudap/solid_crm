@@ -1,0 +1,185 @@
+/* Invoice module styles
+ *
+ * Defines only Invoice-specific styles: status pill palette (.iv-status-*),
+ * source-order backlink (.iv-source-pill), and the 6-column stats bar
+ * (.iv-stats-bar / .iv-stat-*). Layout primitives (toolbar, table shell,
+ * modals, drawer, bulk bar, pagination) are reused from sibling modules.
+ *
+ * ===== EXTERNAL CSS DEPENDENCY MANIFEST =====
+ * Renames in the source files below will silently break Invoices.
+ * Grep this file before refactoring quotation.css or AddLead.css.
+ *
+ * From client/src/Components/Quotation/quotation.css:
+ *   - Toolbar:  .qt-toolbar, .qt-toolbar-group, .qt-toolbar-left,
+ *               .qt-toolbar-center, .qt-toolbar-right, .qt-toolbar-search,
+ *               .qt-toolbar-search-icon, .qt-toolbar-search-clear,
+ *               .qt-toolbar-slot, .qt-toolbar-datewrap, .qt-tb-btn,
+ *               .qt-tb-btn--secondary, .qt-tb-btn--icon, .qt-tb-badge
+ *   - Table:    .qt-wrap, .qt-table, .qt-row, .qt-customer, .qt-avatar,
+ *               .qt-customer-meta, .qt-customer-name, .qt-customer-sub,
+ *               .qt-quote-no, .qt-index, .qt-num, .qt-amount, .qt-muted,
+ *               .qt-actions, .qt-actions-cell, .qt-actions-col,
+ *               .qt-icon-btn, .qt-icon-btn-more, .qt-actions-menu,
+ *               .qt-actions-menu-item, .qt-actions-menu-item-passthrough,
+ *               .qt-actions-menu-divider
+ *   - View modal scope:  .vqm-* (header, body, section, grid, field, total,
+ *                        followups list reused for status history)
+ *   - Edit modal scope:  .eqm-* (header, form, section, grid, field, footer)
+ *   - Status modal:      .usm-* (compact header / field / footer)
+ *   - Dropdowns: .columns-btn, .columns-dropdown, .column-toggle-item,
+ *               .saved-filters-btn, .saved-filters-dropdown,
+ *               .saved-filters-save, .saved-filter-input,
+ *               .save-filter-btn, .saved-filter-item,
+ *               .delete-filter-btn, .no-saved-filters
+ *
+ * From client/src/Components/Leads/AddLead.css:
+ *   - Page shell: .leads-container, .leads-page-header, .leads-title,
+ *                 .leads-header-actions, .refresh-btn
+ *   - Bulk:       .bulk-action-bar, .bulk-status-select,
+ *                 .bulk-export-btn, .bulk-delete-btn
+ *   - Pagination: .pagination, .entries-control, .entries-info,
+ *                 .entries-buttons
+ *   - States:     .empty-state, .empty-state-icon, .empty-state-title,
+ *                 .empty-state-text, .loading-skeleton, .skeleton-row,
+ *                 .skeleton-cell
+ *   - Filter drawer: .filter-drawer, .filter-overlay,
+ *                    .filter-drawer-header, .filter-drawer-close,
+ *                    .filter-drawer-content, .filter-drawer-footer,
+ *                    .filter-group, .filter-input, .filter-select,
+ *                    .filter-apply-btn, .filter-reset-btn
+ *
+ * Modal primitives shared across modules (defined in quotation.css):
+ *   .modal-overlay, .modal-content, .save-btn, .cancel-btn
+ */
+
+/* ===== Invoice status badges (.iv-status-*) ===== */
+.iv-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.iv-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.iv-status-draft {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #e2e8f0;
+}
+
+.iv-status-sent {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+.iv-status-paid {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #d1fae5;
+}
+
+.iv-status-overdue {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fde68a;
+}
+
+.iv-status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fee2e2;
+}
+
+/* ===== Source-order backlink pill ===== */
+.iv-source-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  background: #eef4ff;
+  color: #1d4ed8;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ===== Invoice stats bar (.iv-stats-bar) ===== */
+.iv-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.iv-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 12px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.iv-stat-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.iv-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #6b7280;
+}
+
+.iv-stat-value {
+  margin-top: 6px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  font-variant-numeric: tabular-nums;
+}
+
+.iv-stat-total .iv-stat-label     { color: #475569; }
+.iv-stat-total .iv-stat-value     { color: #1e293b; }
+.iv-stat-draft .iv-stat-label     { color: #64748b; }
+.iv-stat-draft .iv-stat-value     { color: #334155; }
+.iv-stat-sent .iv-stat-label      { color: #3b82f6; }
+.iv-stat-sent .iv-stat-value      { color: #1e40af; }
+.iv-stat-paid .iv-stat-label      { color: #10b981; }
+.iv-stat-paid .iv-stat-value      { color: #047857; }
+.iv-stat-overdue .iv-stat-label   { color: #f59e0b; }
+.iv-stat-overdue .iv-stat-value   { color: #b45309; }
+.iv-stat-cancelled .iv-stat-label { color: #ef4444; }
+.iv-stat-cancelled .iv-stat-value { color: #991b1b; }
+
+@media (max-width: 1100px) {
+  .iv-stats-bar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .iv-stats-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -41,6 +41,14 @@ const invoiceSchema = new mongoose.Schema({
     enum: ['Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled'],
     default: 'Draft',
   },
+  // Audit trail — every status change pushes one entry.
+  statusHistory: [
+    {
+      status: { type: String, required: true },
+      remark: { type: String, default: '' },
+      changedAt: { type: Date, default: Date.now },
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

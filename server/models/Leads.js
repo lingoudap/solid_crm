@@ -28,6 +28,11 @@ const leadSchema = new mongoose.Schema({
   address: { type: String, required: [true, "Address is required"] },
   state: { type: String, required: [true, "State is required"] },
   Source: { type: String, default: "Other" },
+  status: { 
+    type: String, 
+    enum: ["New", "Active", "Converted", "Lost"],
+    default: "New"
+  },
   followUps: [FollowUpSchema],
   customFields: { type: Map, of: String, default: {} },
   createdAt: { type: Date, default: Date.now },

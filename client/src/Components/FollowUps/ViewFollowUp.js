@@ -267,9 +267,9 @@ export default function ViewFollowUps() {
   return (
     <div className="followup-container p-5">
       {/* Page Title */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Follow-Up — View</h1>
-      </div>
+      </div> */}
 
       {/* Header Toolbar */}
       <div className="followup-toolbar">
@@ -329,6 +329,22 @@ export default function ViewFollowUps() {
         >
           📅 Apply - Date Filter
         </button>
+        {/* Date Filter Container */}
+      {dateFilterOpen && (
+        <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200" style={{ position: 'relative', overflow: 'visible' }}>
+          <div style={{ position: 'relative', zIndex: 100 }}>
+            <DateFilterContainer
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
+              dateFilterOpen={true}
+              setDateFilterOpen={setDateFilterOpen}
+              onPageChange={() => {}} 
+            />
+          </div>
+        </div>
+      )}
       </div>
 
       {/* Advanced Filters Section */}
@@ -352,20 +368,7 @@ export default function ViewFollowUps() {
         </select>
       </div>
 
-      {/* Date Filter Container */}
-      {dateFilterOpen && (
-        <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <DateFilterContainer
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
-            dateFilterOpen={dateFilterOpen}
-            setDateFilterOpen={setDateFilterOpen}
-            onPageChange={() => {}} 
-          />
-        </div>
-      )}
+      
 
       {/* Summary Stats */}
       <div className="followup-stats-grid mb-6">
@@ -408,7 +411,7 @@ export default function ViewFollowUps() {
       </div>
 
       {/* Table */}
-      <div style={{ overflowX: "auto" }}>
+      <div style={{ overflowX: "auto", overflowY: "visible" }}>
         <table className="followup-table">
           <thead>
             <tr>

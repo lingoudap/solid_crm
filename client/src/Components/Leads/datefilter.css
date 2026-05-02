@@ -7,6 +7,8 @@
   padding: 8px 12px;
   border-radius: 8px;
   font-family: "Segoe UI", Arial, sans-serif;
+  position: relative;
+  z-index: 10;
 }
 
 .date-filter-container label {
@@ -53,4 +55,150 @@
 
 .clear-btn:hover {
   background-color: #d6d6d6;
+}
+
+.date-filter-button {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.date-filter-button:hover {
+  background-color: #0056b3;
+}
+
+.date-filter-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 10000;
+  min-width: 320px;
+  margin-top: 5px;
+}
+
+.date-filter-dropdown-header {
+  padding: 12px 15px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.date-filter-presets {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding: 8px 0;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.date-preset-btn {
+  padding: 10px 15px;
+  background-color: transparent;
+  color: #333;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.date-preset-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.date-preset-btn.active {
+  background-color: #b0ceef;
+  color: rgb(68, 68, 68);
+  font-weight: 600;
+}
+
+.date-filter-custom {
+  padding: 12px 15px;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-date-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.custom-date-inputs > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-date-inputs label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.custom-date-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.custom-date-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.date-filter-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 15px;
+}
+
+.date-filter-apply {
+  flex: 1;
+  padding: 8px 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.date-filter-apply:hover {
+  background-color: #218838;
+}
+
+.date-filter-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.date-filter-cancel:hover {
+  background-color: #5a6268;
 }

@@ -40,7 +40,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  min-width: 300px;
+  flex-shrink: 0;
 }
 
 /* Sidebar Toggle Button */
@@ -391,18 +391,38 @@
 @media (max-width: 480px) {
   .top-bar {
     padding: 10px;
+    height: auto;
+  }
+
+  .top-bar-left {
+    width: 100%;
+    order: 1;
+    gap: 8px;
   }
 
   .top-bar-title {
     display: none;
   }
 
+  .top-bar-logo-container {
+    display: none;
+  }
+
   .search-container {
     order: 2;
+    width: 100%;
+    margin-top: 8px;
   }
 
   .top-bar-clock {
     display: none;
+  }
+
+  .top-bar-right {
+    width: 100%;
+    order: 3;
+    margin-top: 8px;
+    justify-content: flex-start;
   }
 
   .sidebar-toggle,

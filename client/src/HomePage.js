@@ -34,6 +34,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
   const [leadsCount, setLeadsCount] = useState(0);
   const [quotationsCount, setQuotationsCount] = useState(0);
   const [ordersCount, setOrdersCount] = useState(0);
+  const [invoiceCount, setInvoiceCount] = useState(0);
   const [activeModule, setActiveModule] = useState("Dashboard");
   const [expandedModule, setExpandedModule] = useState(null);
   const [activeSub, setActiveSub] = useState(null);
@@ -183,13 +184,22 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       console.error(err);
     }
   };
-
+const fetchInvoicesCount = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/invoices`);
+      const data = await res.json();
+      setInvoiceCount(Array.isArray(data) ? data.length : 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   useEffect(() => {
     if (activeModule === "Dashboard") {
       fetchCustomerCount();
       fetchLeadsCount();
       fetchQuotationsCount();
       fetchOrdersCount();
+      fetchInvoicesCount();
     }
   }, [activeModule]);
 
@@ -223,6 +233,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
     { name: "Leads", value: leadsCount },
     { name: "Quotations", value: quotationsCount },
     { name: "Orders", value: ordersCount },
+    { name: "Invoices", value: invoiceCount },
   ];
 
   const getIcon = (item) => {
@@ -285,10 +296,10 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
               </div>
               <div className="stat-icon">📦</div>
             </div>
-            <div className="stat-card orders">
+            <div className="stat-card invoices">
               <div className="stat-content">
                 <div className="stat-label">Invoices</div>
-                <div className="stat-value">{ordersCount}</div>
+                <div className="stat-value">{invoiceCount}</div>
               </div>
               <div className="stat-icon">📄</div>
             </div>
@@ -338,7 +349,21 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       case "Order":
         if (activeSub === "Add") return <Order />;
         if (activeSub === "View")
-          return <ViewOrders onRefreshParent={fetchOrdersCount} />;
+          return (
+            <ViewOrders
+              onRefreshParent={fetchOrdersCount}
+              openInvoice={(order) => {
+                setActiveModule("Invoice");
+                setActiveSub("Add");
+                try {
+                  localStorage.setItem(
+                    "convertOrder",
+                    JSON.stringify(order || {})
+                  );
+                } catch (e) {}
+              }}
+            />
+          );
         break;
       case "Invoice":
         if (activeSub === "Add") return <AddInvoice />;
@@ -630,10 +655,10 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
 
         {/* Main Content */}
         <div className="main-content">
-          <h1 style={{ marginLeft: "20px" }}>
+          {/* <h1 style={{ marginLeft: "20px" }}>
             {activeModule}
             {activeSub ? ` — ${activeSub}` : ""}
-          </h1>
+          </h1> */}
 
           {activeModule === "Dashboard" && (
             <div className="marquee-wrapper">

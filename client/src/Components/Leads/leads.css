@@ -1,0 +1,631 @@
+/* ===== Leads Table — modern CRM look (scoped via .lt-wrap) ===== */
+.lt-wrap {
+  background: #fff;
+  border: 1px solid #eef0f3;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  overflow: hidden;
+}
+
+.lt-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+  color: #1f2937;
+}
+
+.lt-table thead th {
+  background: #2c3e50;
+  color: #eef0f3;
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid #eef0f3;
+  white-space: nowrap;
+}
+
+.lt-table tbody td {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle;
+  background: #fff;
+}
+
+.lt-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lt-table tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+.lt-table tbody tr:hover td {
+  background: #f9fbff;
+}
+
+.lt-table .checkbox-col {
+  width: 36px;
+  text-align: center;
+}
+
+.lt-index {
+  color: #9ca3af;
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-muted {
+  color: #9ca3af;
+}
+
+/* Contact cell */
+.lt-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 180px;
+}
+
+.lt-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.lt-contact-name {
+  font-weight: 600;
+  color: #1d4ed8;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  font-size: inherit;
+  line-height: 1.2;
+}
+
+.lt-contact-name:hover {
+  text-decoration: underline;
+}
+
+.lt-contact-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Source pill */
+.lt-source-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+/* Status badges */
+.lt-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.lt-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.lt-status-new {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+.lt-status-active {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #d1fae5;
+}
+
+.lt-status-converted {
+  background: #f5f3ff;
+  color: #6d28d9;
+  border-color: #ede9fe;
+}
+
+.lt-status-lost {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fee2e2;
+}
+
+/* Follow-up badge */
+.lt-followup-badge {
+  display: inline-block;
+  background-color: #e7f3ff;
+  color: #0066cc;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Highlighting — today / overdue */
+.lt-row.lt-highlight-today td {
+  background: #fffbea !important;
+  border-left-color: #ffc107;
+}
+
+.lt-row.lt-highlight-today:hover td {
+  background: #fff9d6 !important;
+}
+
+.lt-row.lt-highlight-overdue td {
+  background: #ffe9e9 !important;
+  border-left-color: #dc3545;
+}
+
+.lt-row.lt-highlight-overdue:hover td {
+  background: #ffd4d4 !important;
+}
+
+/* Sortable headers */
+.lt-table thead th.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.lt-table thead th.sortable-header:hover {
+  background: #f3f4f6;
+  color: #1d4ed8;
+}
+
+.lt-table thead th.sortable-header.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+/* Action icon buttons */
+.lt-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.lt-actions-col,
+.lt-actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.lt-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  padding: 0;
+}
+
+.lt-icon-btn:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+.lt-icon-btn:active {
+  transform: translateY(1px);
+}
+
+.lt-icon-btn.is-open,
+.lt-icon-btn-more.is-open {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+
+/* Overflow menu */
+.lt-actions-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+  padding: 6px;
+  z-index: 50;
+  animation: ltSlideDown 0.12s ease;
+}
+
+@keyframes ltSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.lt-actions-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.lt-actions-menu-item:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.lt-actions-menu-item svg {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.lt-actions-menu-item:hover svg {
+  color: #1d4ed8;
+}
+
+.lt-actions-menu-item-passthrough {
+  padding: 0;
+}
+
+.lt-actions-menu-item-passthrough:hover {
+  background: transparent;
+}
+
+.lt-actions-menu-divider {
+  height: 1px;
+  background: #f1f3f5;
+  margin: 4px 0;
+}
+
+/* Mobile card layout */
+@media (max-width: 720px) {
+  .lt-wrap {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .lt-table,
+  .lt-table thead,
+  .lt-table tbody,
+  .lt-table tr,
+  .lt-table th,
+  .lt-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .lt-table thead {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+  }
+
+  .lt-table tbody tr {
+    background: #fff;
+    border: 1px solid #eef0f3;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    padding: 6px 4px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  }
+
+  .lt-table tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px dashed #f1f3f5;
+    background: transparent;
+    text-align: right;
+  }
+
+  .lt-table tbody td:last-child {
+    border-bottom: none;
+  }
+
+  .lt-table tbody td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  .lt-table tbody td[data-label=""]::before {
+    display: none;
+  }
+
+  .lt-table tbody td[data-label=""] {
+    justify-content: flex-end;
+  }
+
+  .lt-contact {
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .lt-contact-meta {
+    text-align: right;
+  }
+
+  .lt-actions-menu {
+    right: 14px;
+  }
+}
+
+/* ===== Leads Toolbar — modern CRM (scoped via .lt-toolbar) ===== */
+.lt-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border: 1px solid #eef0f3;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.lt-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lt-toolbar-left {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.lt-toolbar-center {
+  flex: 0 0 auto;
+}
+
+.lt-toolbar-right {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* Search input */
+.lt-toolbar-search {
+  position: relative;
+  flex: 1 1 220px;
+  min-width: 200px;
+  max-width: 360px;
+}
+
+.lt-toolbar-search input {
+  width: 100%;
+  padding: 8px 32px 8px 34px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: #111827;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.lt-toolbar-search input::placeholder {
+  color: #9ca3af;
+}
+
+.lt-toolbar-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.lt-toolbar-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.lt-toolbar-search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.lt-toolbar-search-clear:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+/* Toolbar buttons */
+.lt-tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.lt-tb-btn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.lt-tb-btn:active {
+  transform: translateY(1px);
+}
+
+.lt-tb-btn--secondary {
+  border-color: #e5e7eb;
+  background: #fff;
+}
+
+.lt-tb-btn--secondary:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: #111827;
+}
+
+.lt-tb-btn--icon {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+  border-color: #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+}
+
+.lt-tb-btn--icon:hover {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.lt-tb-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 2px;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Override existing column/saved-filters/date-filter buttons inside the
+   toolbar so the visual language stays consistent (subtle outline). */
+.lt-toolbar .columns-btn,
+.lt-toolbar .saved-filters-btn,
+.lt-toolbar .date-filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: none;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.lt-toolbar .columns-btn:hover,
+.lt-toolbar .saved-filters-btn:hover,
+.lt-toolbar .date-filter-button:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .lt-toolbar {
+    gap: 10px;
+  }
+  .lt-toolbar-right {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .lt-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lt-toolbar-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .lt-toolbar-search,
+  .lt-toolbar-search input {
+    max-width: 100%;
+    width: 100%;
+  }
+}

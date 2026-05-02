@@ -28,6 +28,8 @@ const AddOrder = () => {
     { itemName: "", qty: 1, unit: "", price: 0, discount: 0, tax: 0, subtotal: 0 },
   ]);
 
+  const [sourceQuotationId, setSourceQuotationId] = useState(null);
+
   // Prefill from convertQuote when navigated from Quotation -> Convert to Order
   useEffect(() => {
     try {
@@ -54,6 +56,7 @@ const AddOrder = () => {
           }));
           setItems(mapped);
         }
+        if (quote._id) setSourceQuotationId(quote._id);
         localStorage.removeItem("convertQuote");
       }
     } catch (e) {
@@ -166,7 +169,8 @@ const AddOrder = () => {
         items: cleanItems,
         totalAmount: parseFloat(totalAmount).toFixed(2),
         customFields: customFieldValues,
-        date: new Date().toISOString() // Add creation date
+        date: new Date().toISOString(),
+        ...(sourceQuotationId ? { sourceQuotationId } : {}),
       };
 
       // Debug log
@@ -200,6 +204,7 @@ const AddOrder = () => {
         ...Object.fromEntries(customFields.map(field => [field.label, ""]))
       });
       setItems([{ itemName: "", qty: 1, unit: "", price: 0, discount: 0, tax: 0, subtotal: 0 }]);
+      setSourceQuotationId(null);
     } catch (err) {
       console.error("Order error:", err);
       alert(`❌ Error: ${err.message}`);

@@ -90,6 +90,7 @@ export const QUOTATION_CONFIG = {
     customer: true,
     amount: true,
     status: true,
+    priority: true,
     followups: true,
     nextFollowup: true,
     date: true,

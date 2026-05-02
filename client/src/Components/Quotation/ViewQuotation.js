@@ -1,5 +1,5 @@
 // client/src/Components/Quotation/ViewQuotation.js
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "./quotation.css";
 
 import QUOTATION_CONFIG, { isFeatureEnabled } from "./config";
@@ -7,8 +7,8 @@ import QUOTATION_CONFIG, { isFeatureEnabled } from "./config";
 import { useQuotations } from "./hooks/useQuotations";
 import { useQuotationFilters } from "./hooks/useQuotationFilters";
 import { useQuotationSort } from "./hooks/useQuotationSort";
-import { useQuotationSelection } from "./hooks/useQuotationSelection";
-import { useLocalStorageState } from "./hooks/useLocalStorageState";
+import { useTableSelection } from "../../hooks/useTableSelection";
+import { useLocalStorageState } from "../../hooks/useLocalStorageState";
 
 import { getApiBase } from "./utils/apiBase";
 import { exportQuotationsToCSV } from "./utils/csvExport";
@@ -25,6 +25,7 @@ import AddFollowUpModal from "./components/modals/AddFollowUpModal";
 
 const LoadingSkeleton = () => (
   <div className="loading-skeleton">
+    
     {[...Array(5)].map((_, i) => (
       <div key={i} className="skeleton-row">
         <div className="skeleton-cell"></div>
@@ -88,7 +89,7 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
     toggleSelectAll,
     clearSelection,
     isAllSelected,
-  } = useQuotationSelection(pageIds);
+  } = useTableSelection(pageIds);
 
   const [visibleColumns, setVisibleColumns] = useLocalStorageState(
     "viewQuotationsColumns",
@@ -144,26 +145,13 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
   const deleteFilter = (id) =>
     setSavedFilters((prev) => prev.filter((f) => f.id !== id));
 
-  // --- row actions ---
-  const handleView = (q) => setViewModalQuote(q);
-  const handleEdit = (q) => setEditModalQuote({ ...q });
+  // --- row actions (stable identities so memoized rows can skip re-renders) ---
+  const handleView = useCallback((q) => setViewModalQuote(q), []);
+  const handleEdit = useCallback((q) => setEditModalQuote({ ...q }), []);
 
-  const handleUpdateQuote = async (e) => {
-    e.preventDefault();
+  const handleUpdateQuote = async (payload) => {
     try {
-      // NOTE: pre-existing schema mismatch — the edit modal uses `name/item/quantity/amount`
-      // while the backend expects `customerName/items[]/totalAmount`. The PUT returns 400.
-      // Left as-is during refactor; Phase 2 rebuilds this against the real schema.
-      await updateQuotation(editModalQuote._id, {
-        name: editModalQuote.customerName,
-        email: editModalQuote.email,
-        phone: editModalQuote.phone,
-        item: editModalQuote.item,
-        quantity: editModalQuote.quantity,
-        amount: editModalQuote.amount,
-        address: editModalQuote.address,
-        state: editModalQuote.state,
-      });
+      await updateQuotation(editModalQuote._id, payload);
       setEditModalQuote(null);
       await refetch();
       alert("✅ Quotation updated successfully!");
@@ -173,7 +161,7 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
     }
   };
 
-  const handleExportPDF = async (quote) => {
+  const handleExportPDF = useCallback(async (quote) => {
     try {
       const res = await fetch(
         `${getApiBase()}/api/quotations/${quote._id}/export`
@@ -198,11 +186,14 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
       console.error("Error exporting PDF:", err);
       alert(`❌ ${err.message || "Failed to export PDF."}`);
     }
-  };
+  }, []);
 
-  const handleConvertToOrder = (q) => {
-    if (openOrder) openOrder(q);
-  };
+  const handleConvertToOrder = useCallback(
+    (q) => {
+      if (openOrder) openOrder(q);
+    },
+    [openOrder]
+  );
 
   // --- follow-up submission ---
   const handleAddFollowUp = async ({ note, date, time }) => {
@@ -304,7 +295,11 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
   const showingEnd = Math.min(page * perPage, filteredQuotes.length);
 
   return (
+  
     <div className="quotation-container">
+         <h1 className="leads-title">
+          Quotation Management
+        </h1>
       <QuotationFilterDrawer
         open={filterDrawerOpen}
         onClose={() => setFilterDrawerOpen(false)}
@@ -317,7 +312,14 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
       <QuotationStats stats={stats} />
 
       <QuotationToolbar
+        query={filters.query}
+        onQueryChange={filters.setQuery}
         onOpenFilterDrawer={() => setFilterDrawerOpen(true)}
+        activeFilterCount={
+          (filters.filterStatus !== "all" ? 1 : 0) +
+          (filters.startDate && filters.endDate ? 1 : 0) +
+          (filters.query ? 1 : 0)
+        }
         visibleColumns={visibleColumns}
         onToggleColumn={toggleColumn}
         savedFilters={savedFilters}
@@ -389,7 +391,6 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
 
       <EditQuotationModal
         quotation={editModalQuote}
-        onChange={setEditModalQuote}
         onSubmit={handleUpdateQuote}
         onClose={() => setEditModalQuote(null)}
       />

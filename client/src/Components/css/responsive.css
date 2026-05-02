@@ -45,7 +45,7 @@
   .section-title {
     font-size: 1.5rem;
     margin: 15px 0 20px 0;
-    text-align: center;
+    text-align: left;
   }
 
   .stats-container {
@@ -145,15 +145,21 @@
     margin-left: 0;
     width: 100%;
   }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .main-content {
-    padding: 10px;
+    margin-left: 50px;
+    padding: 12px;
   }
 
   .section-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    margin: 15px 0 15px 0;
   }
 
   .stat-box {
@@ -167,23 +173,83 @@
     margin-top: 10px;
   }
 
+  .data-table {
+    font-size: 0.85rem;
+  }
+
+  .data-table tbody td {
+    padding: 10px;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 14px;
+  }
+
+  .main-content {
+    padding: 10px;
+    margin-left: 50px;
+    width: calc(100% - 50px);
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin: 10px 0 15px 0;
+  }
+
+  .stat-box {
+    padding: 12px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stat-icon {
+    margin-left: 0;
+    margin-top: 8px;
+    font-size: 1.8rem;
+  }
+
   .add-customer-form,
   .followup-form,
   .order-form,
   .todo-container {
-    padding: 15px;
+    padding: 12px;
+    margin: 10px 0;
   }
 
   .data-table {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
 
   .data-table thead th,
   .data-table tbody td {
-    padding: 8px;
+    padding: 6px;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .submit-button,
+  button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    padding: 8px;
+    font-size: 16px; /* Prevents zoom on iOS */
   }
 }

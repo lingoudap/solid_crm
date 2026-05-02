@@ -8,7 +8,7 @@ const router = express.Router();
 // =================== CREATE LEAD ===================
 router.post("/", async (req, res) => {
   try {
-    const { name, email, phone, address, state, Source, followUps, customFields } = req.body;
+    const { name, email, phone, address, state, Source, status, followUps, customFields } = req.body;
 
     // Validation
     if (!name || !email || !phone || !address || !state) {
@@ -23,6 +23,7 @@ router.post("/", async (req, res) => {
       address,
       state,
       Source: Source || "Other",
+      status: status || "New",
       followUps: followUps || [],
       customFields: customFields || {},
       createdAt: new Date()
@@ -90,11 +91,11 @@ router.get("/:id", async (req, res) => {
 // =================== UPDATE LEAD ===================
 router.put("/:id", async (req, res) => {
   try {
-    const { name, email, phone, address, state, Source, followUps, customFields } = req.body;
+    const { name, email, phone, address, state, Source, status, followUps, customFields } = req.body;
 
     const updatedLead = await Lead.findByIdAndUpdate(
       req.params.id,
-      { name, email, phone, address, state, Source, followUps, customFields },
+      { name, email, phone, address, state, Source, status, followUps, customFields },
       { new: true, runValidators: true }
     );
 
@@ -126,30 +127,32 @@ router.delete("/:id", async (req, res) => {
   }
 });
 // =================== EXPORT LEAD AS PDF ===================
-router.get("/:name/export", async (req, res) => {
+router.get("/:id/export", async (req, res) => {
   try {
-    const lead = await Lead.findOne({ name: req.params.name });
+    const lead = await Lead.findById(req.params.id);
     if (!lead) return res.status(404).json({ error: "Lead not found" });
     const doc = new PDFDocument();
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename=lead-${lead.customerName}.pdf`
+      `attachment; filename=lead-${lead.name || lead._id}.pdf`
     );
 
     doc.pipe(res);
     doc.fontSize(20).text("Lead Details", { align: "center" }).moveDown();
 
-    doc.fontSize(12).text(`Lead No: ${lead.leadNumber}`);
+    doc.fontSize(12).text(`Name: ${lead.name}`);
     doc.text(`Date: ${new Date(lead.createdAt).toLocaleDateString()}`).moveDown();
 
-    doc.fontSize(14).text("Customer Details").moveDown();
+    doc.fontSize(14).text("Contact Details").moveDown();
     doc.fontSize(12)
-      .text(`Name: ${lead.customerName}`)
+      .text(`Name: ${lead.name}`)
       .text(`Email: ${lead.email}`)
       .text(`Phone: ${lead.phone}`)
       .text(`Address: ${lead.address}`)
       .text(`State: ${lead.state}`)
+      .text(`Source: ${lead.Source}`)
+      .text(`Status: ${lead.status}`)
       .moveDown();
 
     doc.end();
