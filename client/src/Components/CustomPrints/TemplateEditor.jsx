@@ -1,10 +1,15 @@
-import React, { useState, useCallback } from "react";
+// TemplateEditor.jsx
+import React, { useState, useCallback, useEffect } from "react";
 import PlaceholderPanel from "./PlaceholderPanel";
+import SectionBuilder from "./SectionBuilder";
+import { prepareTemplateForSave, parseSectionsFromHTML } from "./sectionToHtmlHelper";
+import { getSampleData } from "../../utils/templateUtils";
+import "./TemplateEditor.css";
 
 /**
  * TemplateEditor Component
- * Form for creating and editing print templates
- * Handles template configuration, HTML content editing, and field management
+ * Form for creating and editing print templates with visual template builder
+ * Handles template configuration with section-based layout
  */
 const TemplateEditor = ({
   template,
@@ -25,33 +30,235 @@ const TemplateEditor = ({
   addBodyField,
 }) => {
   const [draggedField, setDraggedField] = useState(null);
+  const [selectedSectionId, setSelectedSectionId] = useState(null);
+  const [showSectionSelector, setShowSectionSelector] = useState(false);
+  const [selectedSectionType, setSelectedSectionType] = useState(null);
+  const [sectionsInitialized, setSectionsInitialized] = useState(false);
+
+  // Initialize sections from HTML content when editing existing template
+  useEffect(() => {
+    if (
+      isEditing &&
+      template.content &&
+      !template.sections &&
+      !sectionsInitialized
+    ) {
+      // Parse HTML content into sections
+      const parsedSections = parseSectionsFromHTML(template.content);
+      if (parsedSections.length > 0) {
+        setTemplate((prev) => ({
+          ...prev,
+          sections: parsedSections,
+        }));
+      }
+      setSectionsInitialized(true);
+    }
+  }, []);
 
   // Helper to update template property (memoized)
   const updateTemplate = useCallback((key, value) => {
     setTemplate((prev) => ({ ...prev, [key]: value }));
   }, [setTemplate]);
 
-  // Insert placeholder at cursor position in textarea (memoized)
-  const insertPlaceholder = useCallback((fieldId) => {
-    const textarea = document.querySelector(".editor-middle .textarea-control");
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const placeholder = `{{${fieldId}}}`;
-      const currentContent = template.content || "";
-      const newContent =
-        currentContent.substring(0, start) +
-        placeholder +
-        currentContent.substring(end);
-      updateTemplate("content", newContent);
-      setTimeout(() => textarea.focus(), 0);
-    }
-  }, [template.content, updateTemplate]);
+  // Initialize sections array if not present
+  const sections = template.sections || [];
+
+  // Add a new section
+  const addSection = useCallback((sectionType) => {
+    const newSection = {
+      id: Date.now(),
+      type: sectionType,
+      fields: [],
+    };
+    setTemplate((prev) => ({
+      ...prev,
+      sections: [...(prev.sections || []), newSection],
+    }));
+    setShowSectionSelector(false);
+    setSelectedSectionType(null);
+    // Set as selected section
+    setSelectedSectionId(newSection.id);
+  }, [setTemplate]);
+
+  // Add field to section
+  const addFieldToSection = useCallback((sectionId, fieldId) => {
+    setTemplate((prev) => ({
+      ...prev,
+      sections: (prev.sections || []).map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              fields: [...(section.fields || []), fieldId],
+            }
+          : section
+      ),
+    }));
+  }, [setTemplate]);
+
+  // Generate section-based preview
+  const generateSectionPreview = () => {
+    // Use comprehensive sample data from utility
+    const sampleData = getSampleData(template.module);
+    
+    // Get current fields for label lookup
+    const fieldsForLookup = fieldOptions[template.module] || [];
+
+    const getSampleValue = (fieldId) => {
+      // Get sample value from utility data, with fallback to fieldId placeholder
+      return sampleData[fieldId] !== undefined ? sampleData[fieldId] : `[${fieldId}]`;
+    };
+
+    const getFieldLabel = (fieldId) => {
+      const field = fieldsForLookup.find((f) => f.id === fieldId);
+      return field?.label || fieldId;
+    };
+
+    return (
+      <div className="template-preview">
+        <div className="preview-header">
+          <h4>📋 Live Preview</h4>
+          <span className="preview-hint">Based on your sections</span>
+        </div>
+
+        {sections.length === 0 ? (
+          <div className="preview-empty">
+            <p>Add sections to see preview</p>
+          </div>
+        ) : (
+          <div className="preview-content">
+            {sections.map((section, sectionIndex) => {
+              const sectionFields = section.fields || [];
+
+              // Header Section
+              if (section.type === "header") {
+                return (
+                  <div key={section.id} className="preview-section preview-header-section">
+                    <div className="section-label">Header Section</div>
+                    <div className="header-content">
+                      <h3>{template.name || "Template Title"}</h3>
+                      {sectionFields.length > 0 && (
+                        <div className="header-fields">
+                          {sectionFields.map((fieldId) => (
+                            <div key={fieldId} className="preview-field">
+                              <strong>{getFieldLabel(fieldId)}:</strong> {getSampleValue(fieldId)}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Two Column Section
+              if (section.type === "twoColumn") {
+                const midpoint = Math.ceil(sectionFields.length / 2);
+                const leftFields = sectionFields.slice(0, midpoint);
+                const rightFields = sectionFields.slice(midpoint);
+
+                return (
+                  <div key={section.id} className="preview-section preview-two-column">
+                    <div className="section-label">Two Column Section</div>
+                    <div className="two-column-content">
+                      <div className="column">
+                        {leftFields.map((fieldId) => (
+                          <div key={fieldId} className="preview-field">
+                            <strong>{getFieldLabel(fieldId)}:</strong>
+                            <div>{getSampleValue(fieldId)}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="column">
+                        {rightFields.map((fieldId) => (
+                          <div key={fieldId} className="preview-field">
+                            <strong>{getFieldLabel(fieldId)}:</strong>
+                            <div>{getSampleValue(fieldId)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Table Section
+              if (section.type === "table") {
+                return (
+                  <div key={section.id} className="preview-section preview-table-section">
+                    <div className="section-label">Table Section</div>
+                    {sectionFields.length > 0 ? (
+                      <table className="preview-table">
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            {sectionFields.map((fieldId) => (
+                              <th key={fieldId}>{getFieldLabel(fieldId)}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[1, 2, 3].map((rowNum) => (
+                            <tr key={rowNum}>
+                              <td>{rowNum}</td>
+                              {sectionFields.map((fieldId) => (
+                                <td key={fieldId}>{getSampleValue(fieldId)}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className="no-table-fields">Add fields to display table</p>
+                    )}
+                  </div>
+                );
+              }
+
+              // Footer Section
+              if (section.type === "footer") {
+                return (
+                  <div key={section.id} className="preview-section preview-footer-section">
+                    <div className="section-label">Footer Section</div>
+                    <div className="footer-content">
+                      {sectionFields.length > 0 ? (
+                        <div className="footer-fields">
+                          {sectionFields.map((fieldId) => (
+                            <div key={fieldId} className="preview-field">
+                              <strong>{getFieldLabel(fieldId)}:</strong> {getSampleValue(fieldId)}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>No fields added to footer</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const currentFields = fieldOptions[template.module] || [];
-  const availableFields = currentFields.filter(
-    (field) => !(template.bodyFields || []).includes(field.id)
-  );
+  const sectionTypes = [
+    { value: "header", label: "📌 Header Section", description: "Display title and key info" },
+    { value: "twoColumn", label: "📊 Two Column", description: "Side-by-side content" },
+    { value: "table", label: "📋 Table", description: "Data table with rows" },
+    { value: "footer", label: "📍 Footer Section", description: "Bottom content" },
+  ];
+
+  // Handle save with HTML conversion
+  const handleSaveTemplate = useCallback(() => {
+    // Convert sections to HTML before saving
+    const templateForSave = prepareTemplateForSave(template);
+    // Call the parent's onSave with converted template
+    onSave(templateForSave);
+  }, [template, onSave]);
 
   return (
     <div className="create-template">
@@ -200,8 +407,9 @@ const TemplateEditor = ({
               </select>
             </div>
           </div>
+          
 
-          <div className="form-section">
+          {/* <div className="form-section">
             <h3>📄 Header & Footer</h3>
             <div className="form-group">
               <label>Header Content (HTML)</label>
@@ -257,7 +465,7 @@ const TemplateEditor = ({
                 Show Page Numbers
               </label>
             </div>
-          </div>
+          </div> */}
 
           <div className="form-section">
             <h3>💧 Watermark</h3>
@@ -289,137 +497,83 @@ const TemplateEditor = ({
           </div>
         </div>
 
-        {/* Middle Panel - HTML Editor */}
+        {/* Middle Panel - Template Builder */}
         <div className="editor-middle">
           <div className="form-section">
-            <h3>📝 HTML Template Content</h3>
+            <h3>🏗️ Template Builder</h3>
             <p className="help-text">
-              Write HTML with {"{{"} placeholders {"}}"} for dynamic fields
+              Build your template visually using customizable sections
             </p>
-            <textarea
-              value={template.content || ""}
-              onChange={(e) => updateTemplate("content", e.target.value)}
-              placeholder={`<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    line-height: 1.6;
-  }
-</style>
 
-<h1>Template</h1>
-<p>Content here...</p>`}
-              className="textarea-control"
-              rows="18"
+            {/* Section Selector Modal */}
+            {showSectionSelector && (
+              <div className="section-selector-modal">
+                <div className="section-selector-content">
+                  <h4>Select Section Type</h4>
+                  <div className="section-types-grid">
+                    {sectionTypes.map((sectionType) => (
+                      <button
+                        key={sectionType.value}
+                        type="button"
+                        className="section-type-btn"
+                        onClick={() => addSection(sectionType.value)}
+                      >
+                        <div className="btn-label">{sectionType.label}</div>
+                        <div className="btn-description">{sectionType.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-close-modal"
+                    onClick={() => setShowSectionSelector(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Add Section Button */}
+            <button
+              type="button"
+              className="btn-add-section"
+              onClick={() => setShowSectionSelector(true)}
+            >
+              ➕ Add Section
+            </button>
+
+            {/* Section Builder Component */}
+            <SectionBuilder
+              sections={sections}
+              setSections={(newSections) =>
+                setTemplate((prev) => ({
+                  ...prev,
+                  sections: newSections,
+                }))
+              }
+              fieldOptions={currentFields}
             />
           </div>
 
+          {/* Placeholder Panel */}
           <PlaceholderPanel
-            fields={fieldOptions[template.module] || []}
-            onInsert={insertPlaceholder}
+            fields={currentFields}
+            selectedSectionId={selectedSectionId}
+            onAddFieldToSection={addFieldToSection}
           />
-
-          <div className="form-section">
-            <h3>🎨 CSS Styling Tips</h3>
-            <p className="help-text">
-              Add inline CSS in a &lt;style&gt; tag at the top for PDF styling
-            </p>
-            <div className="css-tips-box">
-              <pre>{`<style>
-  body { 
-    font-family: Arial; 
-    padding: 20px; 
-    line-height: 1.6;
-  }
-  h1, h2 { color: #333; }
-  table { 
-    width: 100%; 
-    border-collapse: collapse;
-  }
-  td, th { 
-    border: 1px solid #ddd; 
-    padding: 8px;
-  }
-  .section { 
-    margin: 20px 0; 
-    padding: 15px; 
-    border-left: 3px solid #007bff;
-  }
-</style>`}</pre>
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h3>🎯 Body Fields Order (Drag & Drop)</h3>
-            <p className="help-text">
-              Drag fields below to reorder them for the preview
-            </p>
-            <div
-              className="body-fields-list"
-              onDragOver={handleDragOver}
-            >
-              {(template.bodyFields || []).length === 0 ? (
-                <p className="empty-message">
-                  No fields added. Add fields from above.
-                </p>
-              ) : (
-                (template.bodyFields || []).map((fieldId, index) => {
-                  const field = fieldOptions[template.module]?.find(
-                    (f) => f.id === fieldId
-                  );
-                  return (
-                    <div
-                      key={fieldId}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, fieldId)}
-                      onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, index)}
-                      className="draggable-field"
-                    >
-                      <span>
-                        {field?.icon} {field?.label || fieldId}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeBodyField(index)}
-                        className="remove-field-btn"
-                      >
-                        ❌
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-            <div className="available-fields">
-              <p>
-                <strong>Add fields:</strong>
-              </p>
-              <div className="add-fields-buttons">
-                {availableFields.map((field) => (
-                  <button
-                    key={field.id}
-                    onClick={() => addBodyField(field.id)}
-                    className="add-field-btn"
-                  >
-                    + {field.icon} {field.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right Panel - Preview */}
         <div className="editor-right">
-          {renderPreview()}
+          {generateSectionPreview()}
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="template-actions">
         <button
-          onClick={onSave}
+          onClick={handleSaveTemplate}
           className="btn-save"
         >
           {isEditing ? "💾 Update Template" : "✅ Create Template"}

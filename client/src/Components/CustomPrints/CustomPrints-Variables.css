@@ -1,0 +1,240 @@
+/* CustomPrints-Variables.css - Design System CSS Variables */
+/* Centralized design tokens for consistency and maintainability */
+
+:root {
+  /* ========== COLOR PALETTE ========== */
+  /* Primary Colors */
+  --tp-color-primary: #2563eb;
+  --tp-color-primary-dark: #1e40af;
+  --tp-color-primary-light: #dbeafe;
+  --tp-color-primary-bg: #eff6ff;
+  --tp-color-primary-border: #bfdbfe;
+
+  /* Secondary Colors - Grays */
+  --tp-color-secondary-bg: #f3f4f6;
+  --tp-color-secondary-border: #e5e7eb;
+  --tp-color-secondary-text: #6b7280;
+  --tp-color-secondary-light: #9ca3af;
+
+  /* Danger Colors - Red */
+  --tp-color-danger: #dc2626;
+  --tp-color-danger-dark: #b91c1c;
+  --tp-color-danger-light: #fee2e2;
+  --tp-color-danger-bg: #fef2f2;
+
+  /* Success Colors - Green */
+  --tp-color-success: #10b981;
+  --tp-color-success-dark: #059669;
+  --tp-color-success-light: #ecfdf5;
+
+  /* Text Colors */
+  --tp-color-text-primary: #1a1a1a;
+  --tp-color-text-secondary: #3a3a3a;
+  --tp-color-text-tertiary: #6b7280;
+  --tp-color-text-light: #9ca3af;
+  --tp-color-text-lightest: #cbd5e1;
+
+  /* Background Colors */
+  --tp-color-bg-white: #ffffff;
+  --tp-color-bg-light: #f9fafb;
+  --tp-color-bg-lighter: #fafbfc;
+  --tp-color-bg-lightest: #f8fafc;
+
+  /* ========== SHADOWS ========== */
+  --tp-shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.02);
+  --tp-shadow-normal: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --tp-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --tp-shadow-elevated: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --tp-shadow-document: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --tp-shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.15);
+  --tp-shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+  /* Themed Shadows */
+  --tp-shadow-blue-subtle: 0 2px 8px rgba(37, 99, 235, 0.08);
+  --tp-shadow-blue-normal: 0 4px 12px rgba(37, 99, 235, 0.2);
+  --tp-shadow-blue-hover: 0 8px 16px rgba(37, 99, 235, 0.12);
+  --tp-shadow-red-normal: 0 4px 12px rgba(220, 38, 38, 0.15);
+  --tp-shadow-gray-normal: 0 4px 12px rgba(107, 114, 128, 0.1);
+
+  /* ========== BORDER RADIUS ========== */
+  --tp-radius-card: 16px;
+  --tp-radius-button: 10px;
+  --tp-radius-input: 10px;
+  --tp-radius-pill: 14px;
+  --tp-radius-small: 8px;
+  --tp-radius-tiny: 4px;
+  --tp-radius-minimal: 2px;
+
+  /* ========== SPACING SCALE ========== */
+  --tp-spacing-xs: 4px;
+  --tp-spacing-sm: 8px;
+  --tp-spacing-md: 12px;
+  --tp-spacing-lg: 16px;
+  --tp-spacing-xl: 20px;
+  --tp-spacing-2xl: 24px;
+  --tp-spacing-3xl: 28px;
+  --tp-spacing-4xl: 32px;
+
+  /* ========== TYPOGRAPHY ========== */
+  --tp-font-weight-normal: 400;
+  --tp-font-weight-medium: 500;
+  --tp-font-weight-semibold: 600;
+  --tp-font-weight-bold: 700;
+
+  --tp-font-size-xs: 11px;
+  --tp-font-size-sm: 12px;
+  --tp-font-size-base: 13px;
+  --tp-font-size-md: 14px;
+  --tp-font-size-lg: 16px;
+  --tp-font-size-xl: 18px;
+  --tp-font-size-2xl: 20px;
+  --tp-font-size-3xl: 24px;
+  --tp-font-size-4xl: 28px;
+  --tp-font-size-5xl: 32px;
+
+  /* ========== TRANSITIONS ========== */
+  --tp-transition-fast: all 0.2s ease;
+  --tp-transition-normal: all 0.3s ease;
+  --tp-transition-spring: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ========== BORDERS ========== */
+  --tp-border-subtle: 1px solid var(--tp-color-secondary-border);
+  --tp-border-primary: 1px solid var(--tp-color-primary);
+  --tp-border-secondary: 1px solid var(--tp-color-secondary-border);
+  --tp-border-light: 1px solid #f3f4f6;
+  --tp-border-lightest: 1px solid #f0f0f0;
+
+  /* ========== BUTTONS - SIZE PRESETS ========== */
+  --tp-btn-padding-large: 12px 32px;
+  --tp-btn-padding-medium: 10px 12px;
+  --tp-btn-padding-small: 8px 12px;
+
+  /* ========== Z-INDEX SCALE ========== */
+  --tp-z-dropdown: 1000;
+  --tp-z-sticky-header: 10;
+  --tp-z-modal: 1000;
+  --tp-z-drag: 100;
+}
+
+/* ========== UTILITY ANIMATIONS ========== */
+@keyframes tp-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tp-slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tp-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tp-scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tp-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes tp-shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes tp-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes tp-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes tp-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes tp-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(37, 99, 235, 0);
+  }
+}
+
+/* ========== PREMIUM TRANSITION VARIANTS ========== */
+:root {
+  --tp-transition-slow: all 0.5s ease;
+  --tp-transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --tp-transition-smooth: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* ========== FOCUS RING STYLES ========== */
+:focus-visible {
+  outline: 2px solid var(--tp-color-primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--tp-color-primary);
+  outline-offset: 2px;
+}
+
+/* ========== SMOOTH SCROLL ========== */
+html {
+  scroll-behavior: smooth;
+}

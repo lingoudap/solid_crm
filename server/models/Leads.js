@@ -12,7 +12,7 @@ const FollowUpSchema = new mongoose.Schema({
   },
   assignedTo: {
     type: String,
-    required: [true, "Follow-up assigned-to is required"],
+    // required: [true, "Follow-up assigned-to is required"],
   },
   remark: {
     type: String,

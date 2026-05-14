@@ -66,7 +66,7 @@ const LoginPage = ({ goToRegister, goToHome }) => {
           <img src={appLogo} alt="logo" className="auth-logo" />
         ) : null}
 
-        <h2 className="auth-title">CRM Login</h2>
+        {/* <h2 className="auth-title">CRM Login</h2> */}
         {companyName ? <div style={{ color: "#6b7280", marginBottom: 10 }}>{companyName}</div> : null}
 
         <form onSubmit={handleSubmit} className="auth-form">

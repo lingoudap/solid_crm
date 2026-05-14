@@ -4,6 +4,26 @@
  */
 
 /**
+ * Replace placeholders in HTML content with actual data values
+ * @param {string} htmlContent - HTML content with {{fieldId}} placeholders
+ * @param {Object} data - Data object with field values
+ * @returns {string} HTML content with placeholders replaced by actual values
+ */
+const replaceContentPlaceholders = (htmlContent, data) => {
+  if (!htmlContent) return "";
+  
+  let processedContent = htmlContent;
+  
+  // Find all placeholders {{fieldId}} and replace with actual data
+  const placeholderRegex = /\{\{(\w+)\}\}/g;
+  processedContent = processedContent.replace(placeholderRegex, (match, fieldId) => {
+    return data[fieldId] !== undefined ? data[fieldId] : match;
+  });
+  
+  return processedContent;
+};
+
+/**
  * Generate print-ready HTML for a template with sample data
  * @param {Object} template - Template object with content and styling options
  * @param {Object} data - Sample data to populate placeholders
@@ -13,6 +33,30 @@
 export const generatePrintHTML = (template, data, fieldOptions = []) => {
   const fields = fieldOptions || [];
   const bodyFields = template.bodyFields || [];
+  
+  // Determine content to render:
+  // Priority 1: If template has structured content with sections, use that
+  // Priority 2: Otherwise, render bodyFields as simple fields
+  let mainContent = "";
+  
+  if (template.content && template.content.trim()) {
+    // Template has structured section-based content, replace placeholders
+    mainContent = replaceContentPlaceholders(template.content, data);
+  } else if (bodyFields && bodyFields.length > 0) {
+    // Fallback: render bodyFields as simple field-value pairs
+    mainContent = bodyFields
+      .map((fieldId) => {
+        const field = fields.find((f) => f.id === fieldId);
+        const value = data[fieldId] || "N/A";
+        return `
+        <div class="field">
+          <span class="field-label">${field?.label || fieldId}:</span>
+          <span class="field-value">${value}</span>
+        </div>
+        `;
+      })
+      .join("");
+  }
 
   return `
     <!DOCTYPE html>
@@ -56,11 +100,21 @@ export const generatePrintHTML = (template, data, fieldOptions = []) => {
         `
             : ""
         }
-        .header { margin-bottom: 20px; }
-        .footer { margin-top: 30px; }
+        .template-sections { width: 100%; }
+        .section { margin-bottom: 20px; }
+        .header-section { border-bottom: 2px solid #ddd; padding-bottom: 15px; }
+        .two-column-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .table-section { margin: 20px 0; }
+        .table-section table { width: 100%; border-collapse: collapse; }
+        .table-section th, .table-section td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table-section th { background-color: #f5f5f5; font-weight: bold; }
+        .footer-section { border-top: 2px solid #ddd; padding-top: 15px; }
+        .column { flex: 1; }
         .field { margin-bottom: 10px; }
         .field-label { font-weight: bold; }
         .field-value { margin-left: 10px; }
+        .header { margin-bottom: 20px; }
+        .footer { margin-top: 30px; }
         .signature { margin-top: 50px; }
         .page-number { position: absolute; bottom: 10px; right: 10px; }
         .items-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
@@ -82,18 +136,7 @@ export const generatePrintHTML = (template, data, fieldOptions = []) => {
             : ""
         }
         
-        ${bodyFields
-          .map((fieldId) => {
-            const field = fields.find((f) => f.id === fieldId);
-            const value = data[fieldId] || "N/A";
-            return `
-          <div class="field">
-            <span class="field-label">${field?.label || fieldId}:</span>
-            <span class="field-value">${value}</span>
-          </div>
-          `;
-          })
-          .join("")}
+        ${mainContent}
         
         ${
           template.footerContent

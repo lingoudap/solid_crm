@@ -17,7 +17,7 @@ import ViewTodo from "./Components/TODO/ViewTodo";
 import FollowUpPage from "./Components/FollowUps/AddFollowUp";
 import Settings from "./Components/Settings/Settings";
 import BulkUpload from "./Components/BulkUpload/BulkUpload";
-import CustomPrints from "./Components/CustomPrints/CustomPrints";
+import CustomPrints from "./Components/CustomPrints"; // Imports from index.jsx (refactored component)
 import AddReport from "./Components/Reports/AddReport";
 import ViewReports from "./Components/Reports/ViewReports";
 import ReportDetails from "./Components/Reports/ReportDetails";

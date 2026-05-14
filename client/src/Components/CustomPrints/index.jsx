@@ -10,6 +10,7 @@ import {
 } from "../../services/templateService";
 import { useTemplates } from "../../hooks/useTemplates";
 import { generatePrintHTML, getSampleData } from "../../utils/templateUtils";
+import { prepareTemplateForSave } from "./sectionToHtmlHelper";
 import TemplateList from "./TemplateList";
 import TemplateEditor from "./TemplateEditor";
 import TemplatePreview from "./TemplatePreview";
@@ -41,6 +42,14 @@ const CustomPrints = () => {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState(null);
 
+  // Fetch templates for all modules on component mount
+  useEffect(() => {
+    const modules = ["Lead", "Quotation", "Customer", "Order"];
+    modules.forEach((module) => {
+      fetchTemplates(module);
+    });
+  }, []);
+
   // Show error toast when error occurs
   useEffect(() => {
     if (error) toast.error(error);
@@ -51,6 +60,15 @@ const CustomPrints = () => {
     fetchTemplates(selectedModule);
   }, [selectedModule]);
 
+  // Update newTemplate module when selectedModule changes
+  useEffect(() => {
+    setNewTemplate((prev) => ({
+      ...prev,
+      module: selectedModule,
+    }));
+    setEditingTemplate(null); // Clear editing state when switching modules
+  }, [selectedModule]);
+
   function getInitialTemplate() {
     return {
       name: "",
@@ -58,6 +76,7 @@ const CustomPrints = () => {
       content: "",
       isDefault: false,
       bodyFields: [],
+      sections: [], // Initialize empty sections array for builder
       headerContent: "",
       footerContent: "",
       showLogo: false,
@@ -81,13 +100,16 @@ const CustomPrints = () => {
   }
 
   // Template API handlers
-  async function saveTemplate() {
-    const template = editingTemplate || newTemplate;
+  async function saveTemplate(templateFromEditor) {
+    // Use the prepared template from editor (with generated content) if provided, otherwise fall back to state
+    const template = templateFromEditor || editingTemplate || newTemplate;
 
     if (!template.name.trim()) return toast.error("Template name is required");
     if (!template.content?.trim()) return toast.error("Template content is required");
 
-    const module = editingTemplate?.module || selectedModule;
+    // Get the module from template, or from editingTemplate, or from selectedModule (in order of priority)
+    const module = template.module || editingTemplate?.module || selectedModule;
+    
     const payload = {
       name: template.name.trim(),
       module,
@@ -96,8 +118,10 @@ const CustomPrints = () => {
     };
 
     try {
-      if (editingTemplate?._id) {
-        await updateTemplateAxios(editingTemplate._id, payload);
+      // Check if editing existing template (could be from templateFromEditor or editingTemplate state)
+      const templateId = template._id || editingTemplate?._id;
+      if (templateId) {
+        await updateTemplateAxios(templateId, payload);
         toast.success("✅ Template updated successfully!");
       } else {
         await createTemplateAxios(payload);
@@ -133,7 +157,12 @@ const CustomPrints = () => {
 
   // Preview/Print handlers
   function handlePreviewTemplate(template) {
-    setPreviewTemplate(template);
+    // If template has sections but no content, convert sections to content for preview
+    let templateForPreview = template;
+    if (template.sections && template.sections.length > 0 && !template.content) {
+      templateForPreview = prepareTemplateForSave(template);
+    }
+    setPreviewTemplate(templateForPreview);
     setShowPrintPreview(true);
   }
 
