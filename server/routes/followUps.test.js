@@ -1,7 +1,7 @@
 import request from "supertest";
 import express from "express";
 import mongoose from "mongoose";
-import FollowUp from "../models/FollowUp.js";
+import FollowUp from "../models/FollowUpEnhanced.js";
 import followUpsRouter from "./followUps.js";
 
 // Create an Express app for testing

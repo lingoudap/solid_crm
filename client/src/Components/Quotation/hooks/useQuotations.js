@@ -8,7 +8,12 @@ export function useQuotations() {
   const refetch = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${getApiBase()}/api/quotations`);
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+      const res = await fetch(`${getApiBase()}/api/quotations`, { headers });
       if (!res.ok) throw new Error("Fetch failed");
       const data = await res.json();
       setQuotes(data);
@@ -24,8 +29,10 @@ export function useQuotations() {
   }, [refetch]);
 
   const deleteById = useCallback(async (id) => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${getApiBase()}/api/quotations/${id}`, {
       method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -35,9 +42,13 @@ export function useQuotations() {
   }, []);
 
   const updateStatus = useCallback(async (id, status) => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${getApiBase()}/api/quotations/${id}/status`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ status }),
     });
     if (!res.ok) {
@@ -48,9 +59,13 @@ export function useQuotations() {
   }, []);
 
   const updateQuotation = useCallback(async (id, payload) => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${getApiBase()}/api/quotations/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(payload),
     });
     if (!res.ok) {

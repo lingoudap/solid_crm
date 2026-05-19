@@ -10,7 +10,7 @@ import Lead from '../models/Leads.js';
 import Quotation from '../models/Quotation.js';
 import Customer from '../models/Customer.js';
 import Order from '../models/Order.js';
-import FollowUp from '../models/FollowUp.js';
+import FollowUp from '../models/FollowUpEnhanced.js';
 
 const router = express.Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

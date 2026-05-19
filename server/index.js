@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import jwt from "jsonwebtoken";
 
 // Models
 import User from "./models/User.js";
@@ -76,8 +77,21 @@ app.post("/api/login", async (req, res) => {
 
     console.log("✅ Login successful:", email);
 
+    // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET || "your_secret_key";
+    const token = jwt.sign(
+      { 
+        userId: user._id, 
+        email: user.email,
+        name: user.name 
+      },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
+
     res.json({
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         email: user.email,

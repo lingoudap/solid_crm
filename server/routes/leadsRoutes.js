@@ -1,6 +1,6 @@
 import express from "express";
 import Lead from "../models/Leads.js";
-import FollowUp from "../models/FollowUp.js";
+import FollowUp from "../models/FollowUpEnhanced.js";
 import PDFDocument from "pdfkit";
 
 const router = express.Router();

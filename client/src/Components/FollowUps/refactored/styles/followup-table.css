@@ -1,0 +1,276 @@
+/**
+ * Follow-Up Table Styles
+ */
+
+.followup-table-wrapper {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.followup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.followup-table thead {
+  background: #f9fafb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.followup-table th {
+  padding: 14px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.followup-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease;
+}
+
+.followup-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.followup-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.followup-table td {
+  padding: 14px;
+  color: #374151;
+}
+
+.col-index {
+  width: 50px;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.col-name {
+  min-width: 150px;
+  font-weight: 500;
+}
+
+.col-email {
+  min-width: 150px;
+}
+
+.col-phone {
+  min-width: 120px;
+}
+
+.col-date {
+  min-width: 150px;
+}
+
+.col-status {
+  width: 100px;
+}
+
+.col-notes {
+  min-width: 150px;
+  max-width: 250px;
+}
+
+.col-actions {
+  width: auto;
+  white-space: nowrap;
+}
+
+/* Table Content */
+.type-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.date-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.date-cell small {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-rescheduled {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-cancelled {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.action-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.action-button.add-button {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.action-button.add-button:hover {
+  background: #bfdbfe;
+  border-color: #93c5fd;
+}
+
+.action-button.view-button {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+
+.action-button.view-button:hover {
+  background: #bfdbfe;
+}
+
+.action-button.edit-button {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.action-button.edit-button:hover {
+  background: #fcd34d;
+}
+
+.action-button.delete-button {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.action-button.delete-button:hover {
+  background: #fecaca;
+}
+
+/* Empty State */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Loading */
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.loading-indicator .spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .followup-table th,
+  .followup-table td {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-notes,
+  .col-email,
+  .col-phone {
+    display: none;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .action-button {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

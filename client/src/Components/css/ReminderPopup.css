@@ -1,0 +1,569 @@
+/* ==========================================
+   REMINDER POPUP COMPONENT STYLES
+   ========================================== */
+
+/* ==========================================
+   OVERLAY
+   ========================================== */
+
+.reminder-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================
+   POPUP MODAL
+   ========================================== */
+
+.reminder-popup {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 480px;
+  border-left: 5px solid #4299e1;
+  position: relative;
+  animation: slideInUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   CLOSE BUTTON
+   ========================================== */
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  color: #666;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+
+.popup-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.popup-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+}
+
+.priority-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.reminder-type {
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+/* ==========================================
+   MESSAGE
+   ========================================== */
+
+.popup-message {
+  padding: 16px 24px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 60px;
+}
+
+/* ==========================================
+   DETAILS
+   ========================================== */
+
+.reminder-details {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.detail-label {
+  color: #999;
+  font-weight: 500;
+}
+
+.detail-value {
+  color: #333;
+  font-weight: 500;
+  text-align: right;
+  flex: 1;
+  margin-left: 12px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.status-pending {
+  background: #f39c12;
+  color: white;
+}
+
+.status-badge.status-completed {
+  background: #27ae60;
+  color: white;
+}
+
+.status-badge.status-overdue {
+  background: #e74c3c;
+  color: white;
+}
+
+.status-badge.status-in_progress {
+  background: #3498db;
+  color: white;
+}
+
+/* ==========================================
+   ACTIONS
+   ========================================== */
+
+.popup-actions {
+  padding: 20px 24px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.primary-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-complete {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-complete:hover {
+  background: #229954;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.btn-complete:active {
+  transform: scale(0.98);
+}
+
+.btn-snooze {
+  background: #3498db;
+  color: white;
+}
+
+.btn-snooze:hover {
+  background: #2980b9;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.btn-snooze:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================
+   SNOOZE OPTIONS
+   ========================================== */
+
+.snooze-options {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+
+.snooze-options small {
+  display: block;
+  color: #999;
+  font-size: 11px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.snooze-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.snooze-option {
+  padding: 8px 6px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.snooze-option:hover {
+  border-color: #3498db;
+  color: #3498db;
+  background: #f0f7ff;
+}
+
+.snooze-option.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.popup-footer {
+  padding: 12px 24px;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: color 0.2s ease;
+}
+
+.dismiss-text-btn:hover {
+  color: #e74c3c;
+}
+
+/* ==========================================
+   SOUND INDICATOR
+   ========================================== */
+
+.sound-indicator {
+  position: absolute;
+  top: 12px;
+  left: 24px;
+  background: #27ae60;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 768px) {
+  .reminder-popup-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .reminder-popup {
+    max-width: 100%;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .popup-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-content {
+    width: 100%;
+  }
+
+  .reminder-type {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .primary-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .snooze-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .reminder-popup {
+    border-left: 3px solid;
+  }
+
+  .popup-header {
+    padding: 20px 20px 12px;
+  }
+
+  .popup-message {
+    padding: 12px 20px;
+  }
+
+  .reminder-details {
+    padding: 12px 20px;
+  }
+
+  .popup-actions {
+    padding: 16px 20px;
+  }
+
+  .popup-footer {
+    padding: 8px 20px;
+  }
+
+  .popup-title {
+    font-size: 18px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .detail-value {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .snooze-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .snooze-option {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+
+/* ==========================================
+   DARK MODE SUPPORT
+   ========================================== */
+
+@media (prefers-color-scheme: dark) {
+  .reminder-popup {
+    background: #2c3e50;
+    color: #ecf0f1;
+  }
+
+  .popup-header {
+    border-bottom-color: #34495e;
+  }
+
+  .popup-title {
+    color: #ecf0f1;
+  }
+
+  .popup-message {
+    background: #34495e;
+    color: #bdc3c7;
+    border-bottom-color: #34495e;
+  }
+
+  .reminder-details {
+    border-bottom-color: #34495e;
+  }
+
+  .detail-label {
+    color: #95a5a6;
+  }
+
+  .detail-value {
+    color: #ecf0f1;
+  }
+
+  .popup-actions {
+    border-bottom-color: #34495e;
+  }
+
+  .snooze-options {
+    background: #34495e;
+    border-color: #34495e;
+  }
+
+  .snooze-option {
+    background: #2c3e50;
+    border-color: #34495e;
+    color: #bdc3c7;
+  }
+
+  .snooze-option:hover {
+    background: #3d5a80;
+  }
+
+  .popup-footer {
+    background: #34495e;
+    border-top-color: #34495e;
+  }
+
+  .close-btn {
+    background: #34495e;
+    color: #bdc3c7;
+  }
+
+  .close-btn:hover {
+    background: #3d5a80;
+    color: #ecf0f1;
+  }
+}
+
+/* ==========================================
+   ANIMATION
+   ========================================== */
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-10px);
+  }
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.reminder-popup.critical {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+
+@media print {
+  .reminder-popup-overlay,
+  .reminder-popup {
+    display: none !important;
+  }
+}

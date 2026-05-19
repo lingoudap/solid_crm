@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import FollowUp from "../models/FollowUp.js";
+import FollowUp from "../models/FollowUpEnhanced.js";
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 

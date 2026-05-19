@@ -1,0 +1,162 @@
+/* ===================================
+   OVERDUE BADGE STYLING
+   ===================================*/
+
+.overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  animation: pulse-badge 2s infinite;
+}
+
+.overdue-badge.compact {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+/* Priority levels */
+.overdue-badge.critical {
+  background-color: #fee;
+  color: #c33;
+  border: 1px solid #f99;
+  animation: pulse-critical 1.5s infinite;
+}
+
+.overdue-badge.high {
+  background-color: #fef3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.overdue-badge.medium {
+  background-color: #fff3cd;
+  color: #997404;
+  border: 1px solid #ffc107;
+}
+
+/* Badge icon */
+.overdue-badge .badge-icon {
+  font-size: 14px;
+  animation: bounce-icon 1.5s infinite;
+}
+
+.overdue-badge.critical .badge-icon {
+  animation: bounce-icon 1s infinite;
+}
+
+/* Badge text */
+.overdue-badge .badge-text {
+  white-space: nowrap;
+}
+
+/* ===================================
+   ANIMATIONS
+   ===================================*/
+
+@keyframes pulse-badge {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 8px rgba(204, 51, 51, 0.4);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 12px rgba(204, 51, 51, 0.6);
+  }
+}
+
+@keyframes bounce-icon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   ===================================*/
+
+@media (max-width: 768px) {
+  .overdue-badge {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  .overdue-badge .badge-icon {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .overdue-badge {
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  .overdue-badge .badge-icon {
+    font-size: 11px;
+  }
+
+  .overdue-badge.compact {
+    padding: 1px 4px;
+    font-size: 9px;
+  }
+}
+
+/* ===================================
+   DARK MODE
+   ===================================*/
+
+@media (prefers-color-scheme: dark) {
+  .overdue-badge.critical {
+    background-color: rgba(204, 51, 51, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(204, 51, 51, 0.4);
+  }
+
+  .overdue-badge.high {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffb300;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+  }
+
+  .overdue-badge.medium {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffa500;
+    border: 1px solid rgba(255, 193, 7, 0.2);
+  }
+}
+
+/* ===================================
+   REDUCED MOTION
+   ===================================*/
+
+@media (prefers-reduced-motion: reduce) {
+  .overdue-badge {
+    animation: none;
+  }
+
+  .overdue-badge .badge-icon {
+    animation: none;
+  }
+
+  .overdue-badge.critical {
+    animation: none;
+  }
+}

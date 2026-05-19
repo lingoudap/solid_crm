@@ -10,7 +10,12 @@ export function useInvoices() {
   const refetch = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/invoices`);
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+      const res = await fetch(`${API_BASE}/api/invoices`, { headers });
       if (!res.ok) throw new Error("Failed to fetch invoices");
       setInvoices(await res.json());
     } catch (e) {
@@ -25,8 +30,10 @@ export function useInvoices() {
   }, [refetch]);
 
   const deleteById = useCallback(async (id) => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
       method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -36,9 +43,13 @@ export function useInvoices() {
   }, []);
 
   const updateInvoice = useCallback(async (id, payload) => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${API_BASE}/api/invoices/${id}`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(payload),
     });
     const body = await res.json().catch(() => ({}));
@@ -47,9 +58,13 @@ export function useInvoices() {
   }, []);
 
   const updateStatus = useCallback(async (id, status, remark = "") => {
+    const token = localStorage.getItem("token");
     const res = await fetch(`${API_BASE}/api/invoices/${id}/status`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ status, remark }),
     });
     const body = await res.json().catch(() => ({}));

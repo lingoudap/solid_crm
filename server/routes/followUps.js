@@ -1,5 +1,5 @@
 import express from "express";
-import FollowUp from "../models/FollowUp.js";
+import FollowUp from "../models/FollowUpEnhanced.js";
 
 const router = express.Router();
  

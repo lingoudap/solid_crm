@@ -43,11 +43,23 @@ export default function FollowUpPage({ onCustomerAdded }) {
       const tab = TABS.find(t => t.id === tabId);
       if (!tab) return;
 
-      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/${tab.apiPath}`);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/${tab.apiPath}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+      
       const data = await res.json();
-      setEntries(Array.isArray(data) ? data : []);
+      setEntries(Array.isArray(data) ? data : data.data || []);
     } catch (err) {
       console.error(`Error fetching ${tabId}:`, err);
+      alert(`Failed to fetch ${TABS.find(t => t.id === tabId)?.label}: ${err.message}`);
       setEntries([]);
     } finally {
       setIsLoadingTab(false);
@@ -59,18 +71,29 @@ export default function FollowUpPage({ onCustomerAdded }) {
    */
   const fetchTabCounts = async () => {
     try {
-      const leadRes = await fetch(`${apiBase.replace(/\/$/, '')}/api/leads`);
-      const quotRes = await fetch(`${apiBase.replace(/\/$/, '')}/api/quotations`);
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+      
+      const leadRes = await fetch(`${apiBase.replace(/\/$/, '')}/api/leads`, { headers });
+      const quotRes = await fetch(`${apiBase.replace(/\/$/, '')}/api/quotations`, { headers });
+      
+      if (!leadRes.ok || !quotRes.ok) {
+        throw new Error("Failed to fetch counts");
+      }
       
       const leadData = await leadRes.json();
       const quotData = await quotRes.json();
 
       setTabCounts({
-        leads: Array.isArray(leadData) ? leadData.length : 0,
-        quotations: Array.isArray(quotData) ? quotData.length : 0
+        leads: Array.isArray(leadData) ? leadData.length : (leadData.data?.length || 0),
+        quotations: Array.isArray(quotData) ? quotData.length : (quotData.data?.length || 0)
       });
     } catch (err) {
       console.error("Error fetching tab counts:", err);
+      setTabCounts({ leads: 0, quotations: 0 });
     }
   };
 
@@ -98,14 +121,18 @@ export default function FollowUpPage({ onCustomerAdded }) {
     }
 
     try {
+      const token = localStorage.getItem("token");
       const followUpDateTime = new Date(`${followUpDate}T${followUpTime}`);
       
       // Convert tab to relatedType
       const relatedType = activeTab === "leads" ? "Lead" : "Quotation";
 
-      await fetch(`${apiBase.replace(/\/$/, '')}/api/followups`, {
+      const res = await fetch(`${apiBase.replace(/\/$/, '')}/api/followups`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           relatedType: relatedType,
           relatedId: selectedEntry._id,
@@ -115,8 +142,13 @@ export default function FollowUpPage({ onCustomerAdded }) {
         }),
       });
 
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+
       alert("Follow-up added successfully!");
       resetForm();
+      fetchEntriesByTab(activeTab); // Refresh the list
       if (onCustomerAdded) onCustomerAdded();
     } catch (err) {
       console.error("Error submitting follow-up:", err);

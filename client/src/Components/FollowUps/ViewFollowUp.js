@@ -29,29 +29,41 @@ export default function ViewFollowUps() {
   const fetchFollowUps = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${base.replace(/\/$/, "")}/api/followups`);
+      const token = localStorage.getItem("token");
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+      
+      const res = await fetch(`${base.replace(/\/$/, "")}/api/followups`, { headers });
+      
+      if (!res.ok) {
+        throw new Error(`Failed to fetch follow-ups: ${res.status}`);
+      }
+      
       const data = await res.json();
-      setFollowUps(data);
+      const followUpsList = Array.isArray(data) ? data : data.data || [];
+      setFollowUps(followUpsList);
       
       // Fetch details for each follow-up (lead/quotation name)
       const withDetails = await Promise.all(
-        data.map(async (fu) => {
+        followUpsList.map(async (fu) => {
           let entityName = "Unknown";
           let entityEmail = "-";
           
           try {
             if (fu.relatedType === "Lead") {
-              const leadRes = await fetch(`${base.replace(/\/$/, "")}/api/leads/${fu.relatedId}`);
+              const leadRes = await fetch(`${base.replace(/\/$/, "")}/api/leads/${fu.relatedId}`, { headers });
               if (leadRes.ok) {
                 const lead = await leadRes.json();
                 entityName = lead.name || "Unknown";
                 entityEmail = lead.email || "-";
               }
             } else if (fu.relatedType === "Quotation") {
-              const quotRes = await fetch(`${base.replace(/\/$/, "")}/api/quotations/${fu.relatedId}`);
+              const quotRes = await fetch(`${base.replace(/\/$/, "")}/api/quotations/${fu.relatedId}`, { headers });
               if (quotRes.ok) {
                 const quotation = await quotRes.json();
-                entityName = quotation.customerName || "Unknown";
+                entityName = quotation.customerName || quotation.title || "Unknown";
                 entityEmail = quotation.email || "-";
               }
             }
@@ -70,7 +82,7 @@ export default function ViewFollowUps() {
       setFollowUpsWithDetails(withDetails);
     } catch (error) {
       console.error("❌ Error fetching follow-ups:", error);
-      alert("Failed to fetch follow-ups");
+      alert(`Failed to fetch follow-ups: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -125,12 +137,16 @@ export default function ViewFollowUps() {
       const apiUrl = `${base.replace(/\/$/, "")}/api/followups/${selectedFollowUp._id}`;
       console.log("📍 API URL:", apiUrl);
 
+      const token = localStorage.getItem("token");
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
       const response = await fetch(apiUrl, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(updatePayload),
         signal: controller.signal
       });

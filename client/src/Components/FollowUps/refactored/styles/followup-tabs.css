@@ -1,0 +1,86 @@
+/**
+ * Follow-Up Tabs Styles
+ */
+
+.followup-tabs-container {
+  margin-bottom: 24px;
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.followup-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.followup-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid transparent;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.followup-tab:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.followup-tab.active {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.followup-tab:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tab-label {
+  font-weight: 500;
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.followup-tab.active .tab-count {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .followup-tabs-container {
+    padding: 8px;
+  }
+
+  .followup-tabs {
+    gap: 4px;
+  }
+
+  .followup-tab {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}

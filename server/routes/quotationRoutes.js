@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import PDFDocument from "pdfkit";
 import Quotation from "../models/Quotation.js";
-import FollowUp from "../models/FollowUp.js";
+import FollowUp from "../models/FollowUpEnhanced.js";
 
 const router = express.Router();
 

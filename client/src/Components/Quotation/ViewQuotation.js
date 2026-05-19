@@ -198,9 +198,13 @@ const ViewQuotations = ({ onRefreshParent, openOrder }) => {
   // --- follow-up submission ---
   const handleAddFollowUp = async ({ note, date, time }) => {
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(`${getApiBase()}/api/followups`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           relatedId: followUpQuote._id,
           relatedType: "Quotation",
