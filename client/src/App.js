@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import HomePage from './HomePage';
+import FollowUpDashboard from './Components/Dashboard/FollowUpDashboard';
 import { SettingsProvider } from "./context/SettingsContext";
 
 function App() {
@@ -36,6 +37,10 @@ function App() {
 
         {currentPage === "home" && (
           <HomePage setCurrentPage={setCurrentPage} loggedInUser={loggedInUser} />
+        )}
+
+        {currentPage === "dashboard" && (
+          <FollowUpDashboard />
         )}
       </div>
     </SettingsProvider>

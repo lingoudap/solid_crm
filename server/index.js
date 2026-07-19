@@ -16,9 +16,11 @@ import Order from "./models/Order.js";
 import Quotation from "./models/Quotation.js";
 import Invoice from "./models/Invoice.js";
 import Notification from "./models/Notification.js";
+import FollowUp from "./models/FollowUpEnhanced.js";
 
 // Routes
 import followUpRoutes from "./routes/followUps.js";
+import followUpsEnhancedRoutes from "./routes/followUpsEnhancedRoutes.js";
 import quotationRoutes from "./routes/quotationRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import leadsRoutes from "./routes/leadsRoutes.js";
@@ -28,6 +30,7 @@ import templateRoutes from "./routes/templateRoutes.js";
 import printRoutes from "./routes/printRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
 //  import quotationRoutes from './routes/quotationRoutesEnhanced.js';
 
 // Config
@@ -38,8 +41,26 @@ dotenv.config();
 
 // Connect MongoDB
 connectDB()
-  .then(() => {
+  .then(async () => {
     console.log("✅ MongoDB connected");
+    
+    // Create Follow-Up Indexes
+    try {
+      await FollowUp.collection.createIndexes([
+        { key: { followUpDate: 1 } },           // For sorting by date
+        { key: { status: 1 } },                 // For filtering by status
+        { key: { relatedType: 1 } },            // For filtering by type
+        { key: { relatedId: 1 } },              // For filtering by related item
+        { key: { assignedTo: 1 } },             // For user-specific queries
+        { key: { isOverdue: 1 } },              // For overdue filtering
+        { key: { followUpDate: 1, status: 1 } }, // Compound index for common queries
+        { key: { createdAt: -1 } }              // For sorting by creation date
+      ]);
+      console.log("✅ Follow-Up indexes created successfully");
+    } catch (indexError) {
+      console.warn("⚠️ Index creation warning:", indexError.message);
+    }
+    
     // Start cron AFTER DB is connected
     followUpReminder();
     console.log("⏰ Follow-up reminder cron job started");
@@ -332,6 +353,7 @@ console.log("📝 Registering API routes...");
 
 // Register specific routes FIRST (before generic ones)
 app.use("/api/followups", followUpRoutes);
+app.use("/api/followups-enhanced", followUpsEnhancedRoutes);
 app.use("/api/quotations", quotationRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/leads", leadsRoutes);
@@ -340,6 +362,7 @@ app.use("/api/templates", templateRoutes);
 app.use("/api/print", printRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Register generic /api routes LAST
 app.use("/api", bulkUploadRoutes);

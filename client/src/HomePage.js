@@ -15,6 +15,8 @@ import ViewFollowUps from "./Components/FollowUps/ViewFollowUp";
 import Todo from "./Components/TODO/AddTodo";
 import ViewTodo from "./Components/TODO/ViewTodo";
 import FollowUpPage from "./Components/FollowUps/AddFollowUp";
+import FollowUpTable from "./Components/FollowUps/FollowUpTableComponent";
+import "./Components/FollowUps/FollowUpTable.css";
 import Settings from "./Components/Settings/Settings";
 import BulkUpload from "./Components/BulkUpload/BulkUpload";
 import CustomPrints from "./Components/CustomPrints"; // Imports from index.jsx (refactored component)
@@ -23,6 +25,7 @@ import ViewReports from "./Components/Reports/ViewReports";
 import ReportDetails from "./Components/Reports/ReportDetails";
 import { useSettings } from "./context/SettingsContext";
 import DashboardCharts from "./Components/Dashboard/DashboardCharts.jsx";
+import FollowUpDashboard from "./Components/Dashboard/FollowUpDashboard";
 import NotificationBadge from "./Components/Notifications/NotificationBadge";
 
 const HomePage = ({ setCurrentPage, loggedInUser }) => {
@@ -41,6 +44,8 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
   const [appLogo, setAppLogo] = useState(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [viewingReportId, setViewingReportId] = useState(null);
+  const [followUps, setFollowUps] = useState([]);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
 
   // Include Settings, Reports, Custom Prints in the sidebar
   const modules = ["Lead", "Quotation", "Order", "Invoice", "Customer", "Follow-Up", "ToDo", "Reports", "Bulk Upload", "Custom Prints", "Settings"];
@@ -123,7 +128,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
 
     window.addEventListener("settingsUpdated", handleSettingsUpdate);
     window.addEventListener("storage", handleStorageChange);
-    
+
     return () => {
       window.removeEventListener("settingsUpdated", handleSettingsUpdate);
       window.removeEventListener("storage", handleStorageChange);
@@ -184,7 +189,7 @@ const HomePage = ({ setCurrentPage, loggedInUser }) => {
       console.error(err);
     }
   };
-const fetchInvoicesCount = async () => {
+  const fetchInvoicesCount = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/invoices`);
       const data = await res.json();
@@ -193,15 +198,103 @@ const fetchInvoicesCount = async () => {
       console.error(err);
     }
   };
+
+  // Fetch Follow-Ups Data
+  const fetchFollowUps = async () => {
+    setFollowUpLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${apiUrl}/api/followups`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      setFollowUps(data.data || []);
+    } catch (err) {
+      console.error('Error fetching follow-ups:', err);
+      setFollowUps([]);
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
+  // Handle Edit Follow-Up
+  const handleEdit = (followUp) => {
+    try {
+      localStorage.setItem('editFollowUp', JSON.stringify(followUp));
+      setActiveModule('Follow-Up');
+      setActiveSub('Add');
+    } catch (e) {
+      console.error('Error setting follow-up for edit:', e);
+    }
+  };
+
+  // Handle Delete Follow-Up
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this follow-up?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${apiUrl}/api/followups/${id}`, {
+        method: 'DELETE',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        console.log('✅ Follow-up deleted successfully');
+        fetchFollowUps();
+      }
+    } catch (err) {
+      console.error('Error deleting follow-up:', err);
+    }
+  };
+
+  // Handle Complete Follow-Up
+  const handleComplete = async (id) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${apiUrl}/api/followups/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify({ status: 'Completed' })
+      });
+      if (res.ok) {
+        console.log('✅ Follow-up marked as completed');
+        fetchFollowUps();
+      }
+    } catch (err) {
+      console.error('Error completing follow-up:', err);
+    }
+  };
+
+  // Handle Reschedule Follow-Up
+  const handleReschedule = (followUp) => {
+    try {
+      localStorage.setItem('rescheduleFollowUp', JSON.stringify(followUp));
+      setActiveModule('Follow-Up');
+      setActiveSub('Add');
+    } catch (e) {
+      console.error('Error setting follow-up for reschedule:', e);
+    }
+  };
+
+  // Handle View Timeline
+  const handleTimeline = (followUp) => {
+    console.log('📅 View timeline for follow-up:', followUp);
+    // Opens a timeline view or modal with follow-up history
+    alert(`Timeline for follow-up: ${followUp._id}\n\nThis would show full history and activity log.`);
+  };
   useEffect(() => {
-    if (activeModule === "Dashboard") {
+    if (activeModule === "Follow-Up" && activeSub === "Table") {
+      fetchFollowUps();
+    } else if (activeModule === "Dashboard") {
       fetchCustomerCount();
       fetchLeadsCount();
       fetchQuotationsCount();
       fetchOrdersCount();
       fetchInvoicesCount();
     }
-  }, [activeModule]);
+  }, [activeModule, activeSub]);
 
   // Sidebar navigation logic
   const toggleModule = (mod) => {
@@ -303,7 +396,7 @@ const fetchInvoicesCount = async () => {
               </div>
               <div className="stat-icon">📄</div>
             </div>
-    </div>
+          </div>
 
 
 
@@ -313,10 +406,15 @@ const fetchInvoicesCount = async () => {
       );
     }
 
+    // Follow-Up Analytics Dashboard
+    if (activeModule === "Analytics") {
+      return <FollowUpDashboard />;
+    }
+
     switch (activeModule) {
       case "Lead":
-        if (activeSub === "Add") return <Lead/>;
-        if (activeSub === "View") 
+        if (activeSub === "Add") return <Lead />;
+        if (activeSub === "View")
           return (
             <ViewLeads
               onRefreshParent={fetchLeadsCount}
@@ -325,7 +423,7 @@ const fetchInvoicesCount = async () => {
                 setActiveSub("Add");
                 try {
                   localStorage.setItem("convertLead", JSON.stringify(lead || {}));
-                } catch (e) {}
+                } catch (e) { }
               }}
             />
           );
@@ -341,7 +439,7 @@ const fetchInvoicesCount = async () => {
                 setActiveSub("Add");
                 try {
                   localStorage.setItem("convertQuote", JSON.stringify(quote || {}));
-                } catch (e) {}
+                } catch (e) { }
               }}
             />
           );
@@ -360,7 +458,7 @@ const fetchInvoicesCount = async () => {
                     "convertOrder",
                     JSON.stringify(order || {})
                   );
-                } catch (e) {}
+                } catch (e) { }
               }}
             />
           );
@@ -379,6 +477,17 @@ const fetchInvoicesCount = async () => {
       case "Follow-Up":
         if (activeSub === "Add") return <FollowUpPage />;
         if (activeSub === "View") return <ViewFollowUps />;
+        if (activeSub === "Table") return (
+          <FollowUpTable
+            followUps={followUps}
+            loading={followUpLoading}
+            onEdit={(fu) => handleEdit(fu)}
+            onDelete={(id) => handleDelete(id)}
+            onComplete={(id) => handleComplete(id)}
+            onReschedule={(fu) => handleReschedule(fu)}
+            onViewTimeline={(fu) => handleTimeline(fu)}
+          />
+        );
         break;
       case "ToDo":
         if (activeSub === "Add") return <Todo />;
@@ -407,7 +516,7 @@ const fetchInvoicesCount = async () => {
             />
           );
         break;
-        
+
       default:
         return <div>Welcome — choose a module from the left.</div>;
     }
@@ -427,7 +536,7 @@ const fetchInvoicesCount = async () => {
           <button className="sidebar-toggle" onClick={() => { if (sidebarOpen) setExpandedModule(null); setSidebarOpen(!sidebarOpen); }} title="Toggle sidebar">
             {sidebarOpen ? "⬅️" : "➡️"}
           </button>
-          
+
           {/* Logo Display */}
           {/* <div className="top-bar-logo-container">
             {appLogo ? (
@@ -446,10 +555,10 @@ const fetchInvoicesCount = async () => {
 
         {/* CENTER SECTION: SEARCH BAR */}
         <div className="search-container">
-          <input 
-            type="text" 
-            placeholder="🔍 Search modules, customers..." 
-            className="search-bar" 
+          <input
+            type="text"
+            placeholder="🔍 Search modules, customers..."
+            className="search-bar"
           />
         </div>
 
@@ -460,9 +569,33 @@ const fetchInvoicesCount = async () => {
           </div>
 
           <div className="top-bar-actions">
+            {/* Follow-Up Analytics Button */}
+            <button
+              className="analytics-button"
+              title="Follow-Up Analytics Dashboard"
+              onClick={() => {
+                setActiveModule("Analytics");
+                setActiveSub(null);
+                setExpandedModule(null);
+              }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ddd",
+                background: activeModule === "Analytics" ? "#3B82F6" : "white",
+                color: activeModule === "Analytics" ? "white" : "#333",
+                cursor: "pointer",
+                fontWeight: "500",
+                marginRight: "8px",
+                transition: "all 0.2s"
+              }}
+            >
+              📊 Analytics
+            </button>
+
             {/* Help Button */}
-            <button 
-              className="help-button" 
+            <button
+              className="help-button"
               title="Help & Support"
               onClick={() => alert("📚 Help & Support - Coming Soon!\n\nFeatures:\n• Documentation\n• Video Tutorials\n• Contact Support\n• FAQ")}
             >
@@ -483,8 +616,8 @@ const fetchInvoicesCount = async () => {
             <NotificationBadge userId={loggedInUser?._id || loggedInUser?.id} />
 
             {/* Profile Button */}
-            <button 
-              className="profile-button" 
+            <button
+              className="profile-button"
               title="User Profile"
               onClick={() => setProfileOpen(!profileOpen)}
             >
@@ -550,9 +683,9 @@ const fetchInvoicesCount = async () => {
         <div className={`sidebar ${settings.theme === "dark" ? "dark" : "light"} ${sidebarOpen ? "expanded" : "collapsed"}`}>
           <div className="top-bar-logo-container">
             {appLogo ? (
-              <img 
-                src={appLogo} 
-                alt="App Logo" 
+              <img
+                src={appLogo}
+                alt="App Logo"
                 className="top-bar-logo"
               />
             ) : (
@@ -573,6 +706,21 @@ const fetchInvoicesCount = async () => {
             >
               <span>📊</span>
               {sidebarOpen && <span style={{ marginLeft: "12px", flex: 1 }}>Dashboard</span>}
+            </li>
+
+            {/* Follow-Up Analytics */}
+            <li
+              className={`sidebar-list-item ${activeModule === "Analytics" ? "active" : ""
+                }`}
+              onClick={() => {
+                setActiveModule("Analytics");
+                setActiveSub(null);
+                setExpandedModule(null);
+              }}
+              title="Follow-Up Analytics"
+            >
+              <span>📈</span>
+              {sidebarOpen && <span style={{ marginLeft: "12px", flex: 1 }}>Follow-Up Analytics</span>}
             </li>
 
             {/* Main Modules */}
@@ -631,6 +779,17 @@ const fetchInvoicesCount = async () => {
                           <span>🔎</span>
                           {sidebarOpen && <span style={{ marginLeft: "8px" }}>View {mod}</span>}
                         </li>
+                        {mod === "Follow-Up" && (
+                          <li
+                            className={`sidebar-subitem ${activeModule === mod && activeSub === "Table" ? "active" : ""
+                              }`}
+                            onClick={() => handleSelectSub(mod, "Table")}
+                            title="Table View"
+                          >
+                            <span>📊</span>
+                            {sidebarOpen && <span style={{ marginLeft: "8px" }}>Table View</span>}
+                          </li>
+                        )}
                       </ul>
                     )}
                   </>

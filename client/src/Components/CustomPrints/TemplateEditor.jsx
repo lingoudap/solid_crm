@@ -1,15 +1,22 @@
 // TemplateEditor.jsx
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef, useLayoutEffect } from "react";
 import PlaceholderPanel from "./PlaceholderPanel";
 import SectionBuilder from "./SectionBuilder";
 import { prepareTemplateForSave, parseSectionsFromHTML } from "./sectionToHtmlHelper";
 import { getSampleData } from "../../utils/templateUtils";
 import "./TemplateEditor.css";
+import "./TemplateDesigner.css";
+
+const SECTION_TYPES = [
+  { value: "header",    icon: "📌", label: "Header",     description: "Title block with key fields" },
+  { value: "twoColumn", icon: "📊", label: "Two Column", description: "Side-by-side label/value list" },
+  { value: "table",     icon: "📋", label: "Table",      description: "Rows of itemized data" },
+  { value: "footer",    icon: "📍", label: "Footer",     description: "Closing notes and totals" },
+];
 
 /**
- * TemplateEditor Component
- * Form for creating and editing print templates with visual template builder
- * Handles template configuration with section-based layout
+ * TemplateEditor — modern 3-pane print template designer.
+ * Left: configuration panels. Center: visual section builder. Right: live A4 paper preview.
  */
 const TemplateEditor = ({
   template,
@@ -20,576 +27,567 @@ const TemplateEditor = ({
   fieldOptions,
   modules,
   isEditing,
-  renderPreview,
   paperSizes,
   fontFamilies,
-  handleDragStart,
-  handleDragOver,
-  handleDrop,
-  removeBodyField,
-  addBodyField,
 }) => {
-  const [draggedField, setDraggedField] = useState(null);
-  const [selectedSectionId, setSelectedSectionId] = useState(null);
   const [showSectionSelector, setShowSectionSelector] = useState(false);
-  const [selectedSectionType, setSelectedSectionType] = useState(null);
   const [sectionsInitialized, setSectionsInitialized] = useState(false);
+  const [collapsedPanels, setCollapsedPanels] = useState({});
 
-  // Initialize sections from HTML content when editing existing template
   useEffect(() => {
-    if (
-      isEditing &&
-      template.content &&
-      !template.sections &&
-      !sectionsInitialized
-    ) {
-      // Parse HTML content into sections
+    if (isEditing && template.content && !template.sections && !sectionsInitialized) {
       const parsedSections = parseSectionsFromHTML(template.content);
       if (parsedSections.length > 0) {
-        setTemplate((prev) => ({
-          ...prev,
-          sections: parsedSections,
-        }));
+        setTemplate((prev) => ({ ...prev, sections: parsedSections }));
       }
       setSectionsInitialized(true);
     }
-  }, []);
+  }, [isEditing, template.content, template.sections, sectionsInitialized, setTemplate]);
 
-  // Helper to update template property (memoized)
-  const updateTemplate = useCallback((key, value) => {
-    setTemplate((prev) => ({ ...prev, [key]: value }));
-  }, [setTemplate]);
+  const updateTemplate = useCallback(
+    (key, value) => setTemplate((prev) => ({ ...prev, [key]: value })),
+    [setTemplate]
+  );
 
-  // Initialize sections array if not present
   const sections = template.sections || [];
-
-  // Add a new section
-  const addSection = useCallback((sectionType) => {
-    const newSection = {
-      id: Date.now(),
-      type: sectionType,
-      fields: [],
-    };
-    setTemplate((prev) => ({
-      ...prev,
-      sections: [...(prev.sections || []), newSection],
-    }));
-    setShowSectionSelector(false);
-    setSelectedSectionType(null);
-    // Set as selected section
-    setSelectedSectionId(newSection.id);
-  }, [setTemplate]);
-
-  // Add field to section
-  const addFieldToSection = useCallback((sectionId, fieldId) => {
-    setTemplate((prev) => ({
-      ...prev,
-      sections: (prev.sections || []).map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              fields: [...(section.fields || []), fieldId],
-            }
-          : section
-      ),
-    }));
-  }, [setTemplate]);
-
-  // Generate section-based preview
-  const generateSectionPreview = () => {
-    // Use comprehensive sample data from utility
-    const sampleData = getSampleData(template.module);
-    
-    // Get current fields for label lookup
-    const fieldsForLookup = fieldOptions[template.module] || [];
-
-    const getSampleValue = (fieldId) => {
-      // Get sample value from utility data, with fallback to fieldId placeholder
-      return sampleData[fieldId] !== undefined ? sampleData[fieldId] : `[${fieldId}]`;
-    };
-
-    const getFieldLabel = (fieldId) => {
-      const field = fieldsForLookup.find((f) => f.id === fieldId);
-      return field?.label || fieldId;
-    };
-
-    return (
-      <div className="template-preview">
-        <div className="preview-header">
-          <h4>📋 Live Preview</h4>
-          <span className="preview-hint">Based on your sections</span>
-        </div>
-
-        {sections.length === 0 ? (
-          <div className="preview-empty">
-            <p>Add sections to see preview</p>
-          </div>
-        ) : (
-          <div className="preview-content">
-            {sections.map((section, sectionIndex) => {
-              const sectionFields = section.fields || [];
-
-              // Header Section
-              if (section.type === "header") {
-                return (
-                  <div key={section.id} className="preview-section preview-header-section">
-                    <div className="section-label">Header Section</div>
-                    <div className="header-content">
-                      <h3>{template.name || "Template Title"}</h3>
-                      {sectionFields.length > 0 && (
-                        <div className="header-fields">
-                          {sectionFields.map((fieldId) => (
-                            <div key={fieldId} className="preview-field">
-                              <strong>{getFieldLabel(fieldId)}:</strong> {getSampleValue(fieldId)}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-
-              // Two Column Section
-              if (section.type === "twoColumn") {
-                const midpoint = Math.ceil(sectionFields.length / 2);
-                const leftFields = sectionFields.slice(0, midpoint);
-                const rightFields = sectionFields.slice(midpoint);
-
-                return (
-                  <div key={section.id} className="preview-section preview-two-column">
-                    <div className="section-label">Two Column Section</div>
-                    <div className="two-column-content">
-                      <div className="column">
-                        {leftFields.map((fieldId) => (
-                          <div key={fieldId} className="preview-field">
-                            <strong>{getFieldLabel(fieldId)}:</strong>
-                            <div>{getSampleValue(fieldId)}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="column">
-                        {rightFields.map((fieldId) => (
-                          <div key={fieldId} className="preview-field">
-                            <strong>{getFieldLabel(fieldId)}:</strong>
-                            <div>{getSampleValue(fieldId)}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Table Section
-              if (section.type === "table") {
-                return (
-                  <div key={section.id} className="preview-section preview-table-section">
-                    <div className="section-label">Table Section</div>
-                    {sectionFields.length > 0 ? (
-                      <table className="preview-table">
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            {sectionFields.map((fieldId) => (
-                              <th key={fieldId}>{getFieldLabel(fieldId)}</th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {[1, 2, 3].map((rowNum) => (
-                            <tr key={rowNum}>
-                              <td>{rowNum}</td>
-                              {sectionFields.map((fieldId) => (
-                                <td key={fieldId}>{getSampleValue(fieldId)}</td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    ) : (
-                      <p className="no-table-fields">Add fields to display table</p>
-                    )}
-                  </div>
-                );
-              }
-
-              // Footer Section
-              if (section.type === "footer") {
-                return (
-                  <div key={section.id} className="preview-section preview-footer-section">
-                    <div className="section-label">Footer Section</div>
-                    <div className="footer-content">
-                      {sectionFields.length > 0 ? (
-                        <div className="footer-fields">
-                          {sectionFields.map((fieldId) => (
-                            <div key={fieldId} className="preview-field">
-                              <strong>{getFieldLabel(fieldId)}:</strong> {getSampleValue(fieldId)}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p>No fields added to footer</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              }
-
-              return null;
-            })}
-          </div>
-        )}
-      </div>
-    );
-  };
-
   const currentFields = fieldOptions[template.module] || [];
-  const sectionTypes = [
-    { value: "header", label: "📌 Header Section", description: "Display title and key info" },
-    { value: "twoColumn", label: "📊 Two Column", description: "Side-by-side content" },
-    { value: "table", label: "📋 Table", description: "Data table with rows" },
-    { value: "footer", label: "📍 Footer Section", description: "Bottom content" },
-  ];
 
-  // Handle save with HTML conversion
+  const togglePanel = (key) =>
+    setCollapsedPanels((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const addSection = useCallback(
+    (sectionType) => {
+      const newSection = { id: Date.now(), type: sectionType, fields: [] };
+      setTemplate((prev) => ({ ...prev, sections: [...(prev.sections || []), newSection] }));
+      setShowSectionSelector(false);
+    },
+    [setTemplate]
+  );
+
+  const addFieldToLastSection = useCallback(
+    (fieldId) => {
+      setTemplate((prev) => {
+        const list = prev.sections || [];
+        if (list.length === 0) return prev;
+        const lastId = list[list.length - 1].id;
+        return {
+          ...prev,
+          sections: list.map((s) =>
+            s.id === lastId ? { ...s, fields: [...(s.fields || []), fieldId] } : s
+          ),
+        };
+      });
+    },
+    [setTemplate]
+  );
+
   const handleSaveTemplate = useCallback(() => {
-    // Convert sections to HTML before saving
     const templateForSave = prepareTemplateForSave(template);
-    // Call the parent's onSave with converted template
     onSave(templateForSave);
   }, [template, onSave]);
 
   return (
-    <div className="create-template">
-      {/* Header */}
-      <div className="create-header">
-        <h2>{isEditing ? "✏️ Edit Template" : "➕ Create Print Template"}</h2>
-        <p className="subtitle">
-          {isEditing
-            ? "Modify your template settings and layout"
-            : "Design a custom print template for your business needs"}
-        </p>
-      </div>
-
-      {/* Info Banner for Quotation Templates */}
-      {template.module === "Quotation" && (
-        <div className="info-banner">
-          <p>💡 Pro Tip for Quotations</p>
+    <div className="td-designer">
+      {/* ============ TOP TOOLBAR ============ */}
+      <div className="td-toolbar">
+        <div className="td-toolbar__title">
+          <h2>
+            {isEditing ? "✏️ Edit Print Template" : "✨ Create Print Template"}
+          </h2>
           <p>
-            Include the <strong>Items List</strong> field to automatically
-            display a professional table with Sr. No., Description, Qty, Price,
-            and Subtotal. The system will format currency values with the rupee
-            symbol.
+            {isEditing
+              ? "Modify your template settings and layout"
+              : "Design a professional printable document with drag-and-drop sections"}
           </p>
         </div>
-      )}
+        <div className="td-toolbar__actions">
+          <button type="button" className="td-btn td-btn--ghost" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" className="td-btn td-btn--secondary" onClick={() => onPreview(template)}>
+            👁️ Preview
+          </button>
+          <button type="button" className="td-btn td-btn--primary" onClick={handleSaveTemplate}>
+            {isEditing ? "💾 Update" : "✅ Save Template"}
+          </button>
+        </div>
+      </div>
 
-      <div className="template-editor">
-        {/* Left Panel - Configuration */}
-        <div className="editor-left">
-          <div className="form-section">
-            <h3>📝 Template Details</h3>
+      {/* ============ 3-PANE SHELL ============ */}
+      <div className="td-shell">
+        {/* ---------- LEFT SIDEBAR ---------- */}
+        <aside className="td-pane td-pane--sidebar">
+          {template.module === "Quotation" && (
+            <div className="td-banner">
+              <div className="td-banner__icon">💡</div>
+              <div className="td-banner__body">
+                <p className="td-banner__title">Pro tip for quotations</p>
+                <p className="td-banner__text">
+                  Include the <strong>Items List</strong> field to auto-render a
+                  professional table with Sr. No., Description, Qty, Price, and
+                  Subtotal.
+                </p>
+              </div>
+            </div>
+          )}
 
-            <div className="form-group">
-              <label>Template Name *</label>
+          <SidebarPanel
+            id="details"
+            icon="📝"
+            title="Template Details"
+            collapsed={collapsedPanels.details}
+            onToggle={togglePanel}
+          >
+            <div className="td-field">
+              <label className="td-field__label">
+                Template Name <span className="td-required">*</span>
+              </label>
               <input
                 type="text"
+                className="td-input"
                 value={template.name}
                 onChange={(e) => updateTemplate("name", e.target.value)}
                 placeholder="e.g., Professional Lead Report"
-                className="form-control"
                 required
               />
             </div>
 
             {!isEditing && (
-              <div className="form-group">
-                <label>Select Module *</label>
+              <div className="td-field">
+                <label className="td-field__label">
+                  Module <span className="td-required">*</span>
+                </label>
                 <select
+                  className="td-select"
                   value={template.module}
                   onChange={(e) => updateTemplate("module", e.target.value)}
-                  className="form-control"
                 >
                   {modules.map((mod) => (
-                    <option key={mod} value={mod}>
-                      {mod}
-                    </option>
+                    <option key={mod} value={mod}>{mod}</option>
                   ))}
                 </select>
               </div>
             )}
 
-            <div className="toggle-switch">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={template.isDefault || false}
-                  onChange={(e) => updateTemplate("isDefault", e.target.checked)}
-                />
-                Set as default template for this module
-              </label>
-            </div>
-          </div>
+            <label className="td-toggle">
+              <div className="td-toggle__text">
+                <span className="td-toggle__label">Default template</span>
+                <span className="td-toggle__hint">Use this template by default for this module</span>
+              </div>
+              <input
+                type="checkbox"
+                className="td-toggle__input"
+                checked={template.isDefault || false}
+                onChange={(e) => updateTemplate("isDefault", e.target.checked)}
+              />
+              <span className="td-toggle__track" />
+            </label>
+          </SidebarPanel>
 
-          <div className="form-section">
-            <h3>📐 Layout Settings</h3>
-
-            <div className="form-group">
-              <label>Paper Size</label>
+          <SidebarPanel
+            id="layout"
+            icon="📐"
+            title="Layout Settings"
+            collapsed={collapsedPanels.layout}
+            onToggle={togglePanel}
+          >
+            <div className="td-field">
+              <label className="td-field__label">Paper Size</label>
               <select
+                className="td-select"
                 value={template.paperSize || "A4"}
                 onChange={(e) => updateTemplate("paperSize", e.target.value)}
-                className="form-control"
               >
                 {paperSizes.map((size) => (
-                  <option key={size.value} value={size.value}>
-                    {size.label}
-                  </option>
+                  <option key={size.value} value={size.value}>{size.label}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-group">
-              <label>Orientation</label>
-              <div className="orientation-buttons">
+            <div className="td-field">
+              <label className="td-field__label">Orientation</label>
+              <div className="td-segmented" role="tablist" aria-label="Orientation">
                 <button
                   type="button"
-                  className={`orientation-btn ${
-                    (template.orientation || "portrait") === "portrait"
-                      ? "active"
-                      : ""
-                  }`}
+                  className={`td-segmented__btn ${(template.orientation || "portrait") === "portrait" ? "td-segmented__btn--active" : ""}`}
                   onClick={() => updateTemplate("orientation", "portrait")}
                 >
-                  Portrait
+                  📄 Portrait
                 </button>
                 <button
                   type="button"
-                  className={`orientation-btn ${
-                    (template.orientation || "portrait") === "landscape"
-                      ? "active"
-                      : ""
-                  }`}
+                  className={`td-segmented__btn ${template.orientation === "landscape" ? "td-segmented__btn--active" : ""}`}
                   onClick={() => updateTemplate("orientation", "landscape")}
                 >
-                  Landscape
+                  📰 Landscape
                 </button>
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Font Family</label>
+            <div className="td-field">
+              <label className="td-field__label">Font Family</label>
               <select
+                className="td-select"
                 value={template.fontFamily || "Arial"}
                 onChange={(e) => updateTemplate("fontFamily", e.target.value)}
-                className="form-control"
               >
                 {fontFamilies.map((font) => (
-                  <option key={font.value} value={font.value}>
-                    {font.label}
-                  </option>
+                  <option key={font.value} value={font.value}>{font.label}</option>
                 ))}
               </select>
             </div>
 
-            <div className="form-group">
-              <label>Font Size</label>
+            <div className="td-field">
+              <label className="td-field__label">Font Size</label>
               <select
+                className="td-select"
                 value={template.fontSize || "12px"}
                 onChange={(e) => updateTemplate("fontSize", e.target.value)}
-                className="form-control"
               >
-                <option value="10px">10px (Small)</option>
-                <option value="12px">12px (Normal)</option>
-                <option value="14px">14px (Large)</option>
-                <option value="16px">16px (Extra Large)</option>
+                <option value="10px">10px — Small</option>
+                <option value="12px">12px — Normal</option>
+                <option value="14px">14px — Large</option>
+                <option value="16px">16px — Extra Large</option>
               </select>
             </div>
-          </div>
-          
+          </SidebarPanel>
 
-          {/* <div className="form-section">
-            <h3>📄 Header & Footer</h3>
-            <div className="form-group">
-              <label>Header Content (HTML)</label>
-              <textarea
-                value={template.headerContent || ""}
-                onChange={(e) => updateTemplate("headerContent", e.target.value)}
-                placeholder="<h2>Company Name</h2><p>Your header here...</p>"
-                className="form-control"
-                rows="3"
-              />
-            </div>
-            <div className="form-group">
-              <label>Footer Content (HTML)</label>
-              <textarea
-                value={template.footerContent || ""}
-                onChange={(e) => updateTemplate("footerContent", e.target.value)}
-                placeholder="<p>Thank you for your business!</p>"
-                className="form-control"
-                rows="3"
-              />
-            </div>
-            <div className="toggle-switch">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={template.showSignature || false}
-                  onChange={(e) =>
-                    updateTemplate("showSignature", e.target.checked)
-                  }
-                />
-                Show Signature Line
-              </label>
-            </div>
-            <div className="toggle-switch">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={template.showDate !== false}
-                  onChange={(e) => updateTemplate("showDate", e.target.checked)}
-                />
-                Show Date
-              </label>
-            </div>
-            <div className="toggle-switch">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={template.showPageNumber !== false}
-                  onChange={(e) =>
-                    updateTemplate("showPageNumber", e.target.checked)
-                  }
-                />
-                Show Page Numbers
-              </label>
-            </div>
-          </div> */}
-
-          <div className="form-section">
-            <h3>💧 Watermark</h3>
-            <div className="form-group">
-              <label>Watermark Text</label>
+          <SidebarPanel
+            id="watermark"
+            icon="💧"
+            title="Watermark"
+            collapsed={collapsedPanels.watermark}
+            onToggle={togglePanel}
+          >
+            <div className="td-field">
+              <label className="td-field__label">Watermark Text</label>
               <input
                 type="text"
+                className="td-input"
                 value={template.watermark || ""}
                 onChange={(e) => updateTemplate("watermark", e.target.value)}
-                placeholder="e.g., CONFIDENTIAL, DRAFT, SAMPLE"
-                className="form-control"
+                placeholder="CONFIDENTIAL, DRAFT, SAMPLE"
               />
             </div>
-            <div className="form-group">
-              <label>Opacity (0-1)</label>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={template.watermarkOpacity || 0.1}
-                onChange={(e) =>
-                  updateTemplate("watermarkOpacity", parseFloat(e.target.value))
-                }
-                className="form-control"
-              />
-              <span>{template.watermarkOpacity || 0.1}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Middle Panel - Template Builder */}
-        <div className="editor-middle">
-          <div className="form-section">
-            <h3>🏗️ Template Builder</h3>
-            <p className="help-text">
-              Build your template visually using customizable sections
-            </p>
-
-            {/* Section Selector Modal */}
-            {showSectionSelector && (
-              <div className="section-selector-modal">
-                <div className="section-selector-content">
-                  <h4>Select Section Type</h4>
-                  <div className="section-types-grid">
-                    {sectionTypes.map((sectionType) => (
-                      <button
-                        key={sectionType.value}
-                        type="button"
-                        className="section-type-btn"
-                        onClick={() => addSection(sectionType.value)}
-                      >
-                        <div className="btn-label">{sectionType.label}</div>
-                        <div className="btn-description">{sectionType.description}</div>
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-close-modal"
-                    onClick={() => setShowSectionSelector(false)}
-                  >
-                    Close
-                  </button>
-                </div>
+            <div className="td-field">
+              <label className="td-field__label">Opacity</label>
+              <div className="td-range">
+                <input
+                  type="range"
+                  className="td-range__input"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={template.watermarkOpacity ?? 0.1}
+                  onChange={(e) => updateTemplate("watermarkOpacity", parseFloat(e.target.value))}
+                />
+                <span className="td-range__value">
+                  {Math.round((template.watermarkOpacity ?? 0.1) * 100)}%
+                </span>
               </div>
-            )}
+            </div>
+          </SidebarPanel>
+        </aside>
 
-            {/* Add Section Button */}
-            <button
-              type="button"
-              className="btn-add-section"
-              onClick={() => setShowSectionSelector(true)}
-            >
-              ➕ Add Section
-            </button>
+        {/* ---------- CENTER WORKSPACE ---------- */}
+        <main className="td-pane td-pane--workspace">
+          <div className="td-workspace__head">
+            <div className="td-workspace__title">
+              <h3>🏗️ Document Builder</h3>
+              <span className="td-workspace__count">
+                {sections.length} {sections.length === 1 ? "section" : "sections"}
+              </span>
+            </div>
+            <span className="td-workspace__hint">Drag to reorder · Click to expand</span>
+          </div>
 
-            {/* Section Builder Component */}
+          <button
+            type="button"
+            className="td-add-cta"
+            onClick={() => setShowSectionSelector(true)}
+          >
+            <span className="td-add-cta__plus">+</span>
+            Add new section
+          </button>
+
+          {sections.length === 0 ? (
+            <div className="td-empty-builder">
+              <div className="td-empty-builder__icon">📐</div>
+              <h4 className="td-empty-builder__title">Start building your template</h4>
+              <p className="td-empty-builder__sub">
+                Add a header, table, two-column layout, or footer section. Each
+                section is fully customizable with the fields you need.
+              </p>
+            </div>
+          ) : (
             <SectionBuilder
               sections={sections}
               setSections={(newSections) =>
-                setTemplate((prev) => ({
-                  ...prev,
-                  sections: newSections,
-                }))
+                setTemplate((prev) => ({ ...prev, sections: newSections }))
               }
               fieldOptions={currentFields}
             />
-          </div>
+          )}
 
-          {/* Placeholder Panel */}
           <PlaceholderPanel
             fields={currentFields}
-            selectedSectionId={selectedSectionId}
-            onAddFieldToSection={addFieldToSection}
+            hasSections={sections.length > 0}
+            onAddField={addFieldToLastSection}
           />
-        </div>
+        </main>
 
-        {/* Right Panel - Preview */}
-        <div className="editor-right">
-          {generateSectionPreview()}
-        </div>
+        {/* ---------- RIGHT PREVIEW PANE ---------- */}
+        <aside className="td-pane td-pane--preview">
+          <div className="td-preview-head">
+            <div className="td-preview-head__title">
+              <span className="td-preview-head__icon">📄</span>
+              Live Preview
+            </div>
+            <div className="td-preview-head__meta">
+              <span className="td-preview-head__chip">
+                {(template.paperSize || "A4")}
+              </span>
+              <span className="td-preview-head__chip">
+                {(template.orientation || "portrait").toUpperCase()}
+              </span>
+            </div>
+          </div>
+
+          <PaperPreview
+            template={template}
+            sections={sections}
+            fieldOptions={currentFields}
+          />
+        </aside>
       </div>
 
-      {/* Action Buttons */}
-      <div className="template-actions">
-        <button
-          onClick={handleSaveTemplate}
-          className="btn-save"
-        >
-          {isEditing ? "💾 Update Template" : "✅ Create Template"}
-        </button>
-        <button
-          onClick={() => onPreview(template)}
-          className="btn-edit"
-        >
-          👁️ Preview
-        </button>
-        <button
-          onClick={onCancel}
-          className="btn-cancel"
-        >
-          ❌ Cancel
-        </button>
+      {/* ============ SECTION TYPE PICKER MODAL ============ */}
+      {showSectionSelector && (
+        <div className="td-modal" role="dialog" aria-modal="true" onClick={() => setShowSectionSelector(false)}>
+          <div className="td-modal__card" onClick={(e) => e.stopPropagation()}>
+            <div className="td-modal__head">
+              <h4 className="td-modal__title">Choose a section type</h4>
+              <button
+                type="button"
+                className="td-icon-btn"
+                onClick={() => setShowSectionSelector(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="td-modal__body">
+              <div className="td-section-types">
+                {SECTION_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    className="td-section-type"
+                    onClick={() => addSection(t.value)}
+                  >
+                    <span className="td-section-type__icon">{t.icon}</span>
+                    <span className="td-section-type__label">{t.label}</span>
+                    <span className="td-section-type__desc">{t.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="td-modal__foot">
+              <button
+                type="button"
+                className="td-btn td-btn--ghost"
+                onClick={() => setShowSectionSelector(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SidebarPanel = ({ id, icon, title, collapsed, onToggle, children }) => (
+  <section className={`td-panel ${collapsed ? "td-panel--collapsed" : ""}`}>
+    <div className="td-panel__head" onClick={() => onToggle(id)}>
+      <div className="td-panel__title">
+        <span className="td-panel__icon">{icon}</span>
+        {title}
+      </div>
+      <span className="td-panel__chevron">▼</span>
+    </div>
+    <div className="td-panel__body">{children}</div>
+  </section>
+);
+
+const PaperPreview = ({ template, sections, fieldOptions }) => {
+  const wrapRef = useRef(null);
+  const paperRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  const sampleData = getSampleData(template.module);
+  const getSampleValue = (fieldId) =>
+    sampleData[fieldId] !== undefined ? sampleData[fieldId] : `[${fieldId}]`;
+  const getFieldLabel = (fieldId) => {
+    const f = fieldOptions.find((x) => x.id === fieldId);
+    return f?.label || fieldId;
+  };
+
+  useLayoutEffect(() => {
+    const recompute = () => {
+      const wrap = wrapRef.current;
+      const paper = paperRef.current;
+      if (!wrap || !paper) return;
+      const wrapWidth = wrap.clientWidth - 24;
+      const paperWidth = paper.offsetWidth;
+      if (!paperWidth) return;
+      const next = Math.min(1, wrapWidth / paperWidth);
+      setScale(next > 0 ? next : 1);
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    return () => ro.disconnect();
+  }, [template.orientation, template.paperSize]);
+
+  const isLandscape = template.orientation === "landscape";
+
+  return (
+    <div
+      ref={wrapRef}
+      className="td-paper-wrap"
+      data-scale="auto"
+      style={{ "--td-paper-scale": scale }}
+    >
+      <div
+        ref={paperRef}
+        className={`td-paper ${isLandscape ? "td-paper--landscape" : ""}`}
+        style={{
+          fontFamily: template.fontFamily ? `${template.fontFamily}, sans-serif` : undefined,
+          fontSize: template.fontSize || undefined,
+        }}
+      >
+        {template.watermark && (
+          <div
+            className="td-paper__watermark"
+            style={{ opacity: template.watermarkOpacity ?? 0.1 }}
+          >
+            {template.watermark}
+          </div>
+        )}
+
+        {sections.length === 0 ? (
+          <div className="td-doc-empty">
+            <div className="td-doc-empty__icon">📄</div>
+            <div className="td-doc-empty__title">Your document preview will appear here</div>
+            <div className="td-doc-empty__sub">
+              Add sections from the builder to see how your document will look when printed.
+            </div>
+          </div>
+        ) : (
+          sections.map((section) => {
+            const fields = section.fields || [];
+
+            if (section.type === "header") {
+              return (
+                <div key={section.id} className="td-doc-section td-doc-header">
+                  <h1>{template.name || "Document Title"}</h1>
+                  {fields.length > 0 && (
+                    <div className="td-doc-header__fields">
+                      {fields.map((fid) => (
+                        <div key={fid} className="td-doc-field">
+                          <span className="td-doc-field__label">{getFieldLabel(fid)}:</span>
+                          <span className="td-doc-field__value">{getSampleValue(fid)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            if (section.type === "twoColumn") {
+              const mid = Math.ceil(fields.length / 2);
+              const left = fields.slice(0, mid);
+              const right = fields.slice(mid);
+              return (
+                <div key={section.id} className="td-doc-section">
+                  <div className="td-doc-twocol">
+                    <div>
+                      {left.map((fid) => (
+                        <div key={fid} className="td-doc-field">
+                          <span className="td-doc-field__label">{getFieldLabel(fid)}</span>
+                          <span className="td-doc-field__value">{getSampleValue(fid)}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      {right.map((fid) => (
+                        <div key={fid} className="td-doc-field">
+                          <span className="td-doc-field__label">{getFieldLabel(fid)}</span>
+                          <span className="td-doc-field__value">{getSampleValue(fid)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            if (section.type === "table") {
+              return (
+                <div key={section.id} className="td-doc-section">
+                  {fields.length > 0 ? (
+                    <table className="td-doc-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: 40 }}>#</th>
+                          {fields.map((fid) => (
+                            <th key={fid}>{getFieldLabel(fid)}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[1, 2, 3].map((row) => (
+                          <tr key={row}>
+                            <td>{row}</td>
+                            {fields.map((fid) => (
+                              <td key={fid}>{getSampleValue(fid)}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="td-doc-table__empty">Add fields to display table columns</div>
+                  )}
+                </div>
+              );
+            }
+
+            if (section.type === "footer") {
+              return (
+                <div key={section.id} className="td-doc-section td-doc-footer">
+                  {fields.length > 0 ? (
+                    fields.map((fid) => (
+                      <div key={fid} className="td-doc-field">
+                        <span className="td-doc-field__label">{getFieldLabel(fid)}:</span>
+                        <span className="td-doc-field__value">{getSampleValue(fid)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={{ textAlign: "center", color: "#94a3b8", fontStyle: "italic" }}>
+                      Footer placeholder
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return null;
+          })
+        )}
       </div>
     </div>
   );

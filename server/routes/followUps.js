@@ -1,20 +1,21 @@
 import express from "express";
 import FollowUp from "../models/FollowUpEnhanced.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
  
 // Get all follow-ups
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const data = await FollowUp.find().sort({ followUpDate: 1 });
-    res.json(data);
+    res.json({ data });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // Add a new follow-up
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { relatedType, relatedId, followUpDate, notes, status } = req.body;
     const followUp = new FollowUp({ relatedType, relatedId, followUpDate, notes, status });
@@ -26,7 +27,7 @@ router.post("/", async (req, res) => {
 });
 
 // Update follow-up status after conversation
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
   try {
     console.log("🔍 PUT /api/followups/:id - ID:", req.params.id);
     console.log("📨 Request body:", req.body);
@@ -88,6 +89,19 @@ router.put("/:id", async (req, res) => {
   } catch (err) {
     console.error("❌ Error updating follow-up:", err);
     res.status(400).json({ error: err.message || "Failed to update follow-up" });
+  }
+});
+
+// Delete a follow-up
+router.delete("/:id", authMiddleware, async (req, res) => {
+  try {
+    const followUp = await FollowUp.findByIdAndDelete(req.params.id);
+    if (!followUp) {
+      return res.status(404).json({ error: "Follow-up not found" });
+    }
+    res.json({ message: "Follow-up deleted successfully", followUp });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

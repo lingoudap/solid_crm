@@ -1,56 +1,37 @@
 import React, { useState } from "react";
 import "./SectionBuilder.css";
 
+const SECTION_META = {
+  header:    { icon: "📌", label: "Header" },
+  twoColumn: { icon: "📊", label: "Two Column" },
+  table:     { icon: "📋", label: "Table" },
+  footer:    { icon: "📍", label: "Footer" },
+};
+
 /**
- * SectionBuilder Component
- * Visual editor for template sections with drag-and-drop reordering
- * Allows adding/removing fields and managing section order
+ * SectionBuilder — visual block list with drag-to-reorder and field pills.
+ * Uses the td- design system from TemplateDesigner.css.
  */
 const SectionBuilder = ({ sections = [], setSections, fieldOptions = [] }) => {
   const [expandedSectionId, setExpandedSectionId] = useState(null);
   const [draggedSectionId, setDraggedSectionId] = useState(null);
-  const [showFieldSelector, setShowFieldSelector] = useState(null);
 
-  // Get field label by ID
-  const getFieldLabel = (fieldId) => {
-    return fieldOptions.find((f) => f.id === fieldId);
-  };
+  const getField = (fieldId) => fieldOptions.find((f) => f.id === fieldId);
 
-  // Add field to section (keeps dropdown open for multiple selections)
-  const addFieldToSection = (sectionId, fieldId) => {
-    setSections(
-      sections.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              fields: [...(section.fields || []), fieldId],
-            }
-          : section
-      )
-    );
-    // Don't close dropdown - allows multiple field selections
-  };
-
-  // Remove field from section
   const removeFieldFromSection = (sectionId, fieldIndex) => {
     setSections(
       sections.map((section) =>
         section.id === sectionId
-          ? {
-              ...section,
-              fields: section.fields.filter((_, i) => i !== fieldIndex),
-            }
+          ? { ...section, fields: section.fields.filter((_, i) => i !== fieldIndex) }
           : section
       )
     );
   };
 
-  // Remove section
   const removeSection = (sectionId) => {
     setSections(sections.filter((s) => s.id !== sectionId));
   };
 
-  // Drag and drop handlers for reordering sections
   const handleDragStart = (e, sectionId) => {
     setDraggedSectionId(sectionId);
     e.dataTransfer.effectAllowed = "move";
@@ -67,184 +48,111 @@ const SectionBuilder = ({ sections = [], setSections, fieldOptions = [] }) => {
       setDraggedSectionId(null);
       return;
     }
-
-    // Find indices
     const draggedIndex = sections.findIndex((s) => s.id === draggedSectionId);
     const targetIndex = sections.findIndex((s) => s.id === targetSectionId);
-
-    // Reorder sections
     const newSections = [...sections];
     const [draggedSection] = newSections.splice(draggedIndex, 1);
     newSections.splice(targetIndex, 0, draggedSection);
-
     setSections(newSections);
     setDraggedSectionId(null);
   };
 
-  const sectionTypeLabels = {
-    header: "📌 Header",
-    twoColumn: "📊 Two Column",
-    table: "📋 Table",
-    footer: "📍 Footer",
-  };
-
-  // Get available fields (not already in section)
-  const getAvailableFields = (sectionId) => {
-    const section = sections.find((s) => s.id === sectionId);
-    const usedFields = section?.fields || [];
-    return fieldOptions.filter((field) => !usedFields.includes(field.id));
-  };
+  if (sections.length === 0) return null;
 
   return (
-    <div className="section-builder">
-      <div className="sections-list">
-        {sections.length === 0 ? (
-          <div className="empty-state">
-            <p>No sections yet. Add one using the button above.</p>
-          </div>
-        ) : (
-          sections.map((section, index) => {
-            const isExpanded = expandedSectionId === section.id;
-            const availableFields = getAvailableFields(section.id);
+    <div className="td-sections">
+      {sections.map((section) => {
+        const isExpanded = expandedSectionId === section.id;
+        const meta = SECTION_META[section.type] || { icon: "📦", label: section.type };
+        const fields = section.fields || [];
 
-            return (
-              <div
-                key={section.id}
-                className={`section-card ${
-                  draggedSectionId === section.id ? "dragging" : ""
-                }`}
-                draggable
-                onDragStart={(e) => handleDragStart(e, section.id)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, section.id)}
-              >
-                {/* Section Header */}
-                <div className="section-card-header">
-                  <div className="section-card-left">
-                    <span className="drag-handle">⋮⋮</span>
-                    <button
-                      type="button"
-                      className="expand-btn"
-                      onClick={() =>
-                        setExpandedSectionId(
-                          isExpanded ? null : section.id
-                        )
-                      }
-                    >
-                      {isExpanded ? "▼" : "▶"}
-                    </button>
-                    <span className="section-type-badge">
-                      {sectionTypeLabels[section.type] || section.type}
-                    </span>
-                    <span className="section-index">#{index + 1}</span>
+        return (
+          <div
+            key={section.id}
+            className={`td-section-card ${draggedSectionId === section.id ? "td-section-card--dragging" : ""}`}
+            draggable
+            onDragStart={(e) => handleDragStart(e, section.id)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, section.id)}
+          >
+            <div
+              className="td-section-card__head"
+              onClick={() => setExpandedSectionId(isExpanded ? null : section.id)}
+            >
+              <div className="td-section-card__left">
+                <span
+                  className="td-drag-handle"
+                  title="Drag to reorder"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  ⋮⋮
+                </span>
+                <span className="td-section-card__type">
+                  <span className="td-section-card__type-icon">{meta.icon}</span>
+                  {meta.label}
+                </span>
+                <span className="td-section-card__count">
+                  {fields.length} {fields.length === 1 ? "field" : "fields"}
+                </span>
+              </div>
+              <div className="td-section-card__actions">
+                <button
+                  type="button"
+                  className="td-icon-btn"
+                  title={isExpanded ? "Collapse" : "Expand"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedSectionId(isExpanded ? null : section.id);
+                  }}
+                >
+                  {isExpanded ? "▾" : "▸"}
+                </button>
+                <button
+                  type="button"
+                  className="td-icon-btn td-icon-btn--danger"
+                  title="Delete section"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSection(section.id);
+                  }}
+                >
+                  🗑
+                </button>
+              </div>
+            </div>
+
+            {isExpanded && (
+              <div className="td-section-card__body">
+                <p className="td-section-card__fields-label">Fields in this section</p>
+                {fields.length > 0 ? (
+                  <div className="td-section-card__field-pills">
+                    {fields.map((fieldId, idx) => {
+                      const field = getField(fieldId);
+                      return (
+                        <span key={`${section.id}-${idx}`} className="td-pill">
+                          <span>{field?.icon} {field?.label || fieldId}</span>
+                          <button
+                            type="button"
+                            className="td-pill__remove"
+                            title="Remove field"
+                            onClick={() => removeFieldFromSection(section.id, idx)}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      );
+                    })}
                   </div>
-                  <button
-                    type="button"
-                    className="btn-remove-section"
-                    onClick={() => removeSection(section.id)}
-                  >
-                    🗑️
-                  </button>
-                </div>
-
-                {/* Section Content */}
-                {isExpanded && (
-                  <div className="section-card-content">
-                    {/* Fields as Tags */}
-                    <div className="fields-section">
-                      <h5>Fields in Section</h5>
-                      {section.fields && section.fields.length > 0 ? (
-                        <div className="fields-tags">
-                          {section.fields.map((fieldId, fieldIndex) => {
-                            const field = getFieldLabel(fieldId);
-                            return (
-                              <div
-                                key={`${section.id}-${fieldIndex}`}
-                                className="field-tag"
-                              >
-                                <span className="field-tag-label">
-                                  {field?.icon} {field?.label || fieldId}
-                                </span>
-                                <button
-                                  type="button"
-                                  className="btn-remove-field-tag"
-                                  onClick={() =>
-                                    removeFieldFromSection(section.id, fieldIndex)
-                                  }
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="no-fields-message">No fields added yet</p>
-                      )}
-                    </div>
-
-                    {/* Add Field */}
-                    <div className="add-field-section">
-                      <button
-                        type="button"
-                        className="btn-add-field"
-                        onClick={() =>
-                          setShowFieldSelector(
-                            showFieldSelector === section.id ? null : section.id
-                          )
-                        }
-                      >
-                        ➕ Add Field
-                      </button>
-
-                      {/* Field Selector Dropdown */}
-                      {showFieldSelector === section.id && (
-                        <div className="field-selector">
-                          <div className="field-selector-header">
-                            <span>Select Fields</span>
-                            <button
-                              type="button"
-                              className="field-selector-close"
-                              onClick={() => setShowFieldSelector(null)}
-                              title="Close selector"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                          <div className="field-selector-list">
-                            {availableFields.length > 0 ? (
-                              <>
-                                {availableFields.map((field) => (
-                                  <button
-                                    key={field.id}
-                                    type="button"
-                                    className="field-option"
-                                    onClick={() =>
-                                      addFieldToSection(section.id, field.id)
-                                    }
-                                  >
-                                    <span className="field-icon">{field.icon}</span>
-                                    <span className="field-name">{field.label}</span>
-                                    <span className="field-add-icon">+</span>
-                                  </button>
-                                ))}
-                              </>
-                            ) : (
-                              <p className="no-available-fields">
-                                All fields already added
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                ) : (
+                  <p className="td-no-fields">
+                    No fields yet. Add some from the “Available Fields” panel below.
+                  </p>
                 )}
               </div>
-            );
-          })
-        )}
-      </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
